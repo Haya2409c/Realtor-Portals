@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site Settings - Admin Portal</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        navy: {
+                            900: '#060B19',
+                            800: '#0B132B',
+                            700: '#1C2541',
+                            600: '#3A506B',
+                        },
+                        gold: {
+                            400: '#F1C40F',
+                            500: '#D4AF37',
+                            600: '#AA8C2C',
+                        }
+                    },
+                    boxShadow: {
+                        'premium': '0 10px 30px -10px rgba(0, 0, 0, 0.5)',
+                        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.1)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        /* Base styles */
+        body {
+            @apply bg-navy-900 text-white transition-colors duration-300 overflow-x-hidden;
+        }
+
+        /* Subtle Glassmorphism Utilities */
+        .glass-card { @apply bg-navy-800/80 backdrop-blur-md border border-navy-700 shadow-glass; }
+        
+        /* Table Styles */
+        .glass-table th { @apply bg-navy-800/80 font-medium text-xs tracking-wider text-gray-400 uppercase py-3 px-6 text-left border-b border-navy-700 whitespace-nowrap; }
+        .glass-table td { @apply py-4 px-6 border-b border-navy-700/50 text-sm text-gray-300; }
+
+        @layer components {
+            .panel-card { @apply bg-navy-800/50 backdrop-blur-sm border border-navy-700 rounded-xl p-6; }
+            .form-input { @apply w-full bg-navy-900 border border-navy-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500 transition-colors placeholder-gray-500; }
+            .form-label { @apply block text-sm font-medium text-gray-300 mb-2; }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            @apply bg-transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            @apply bg-navy-700 rounded-full;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            @apply bg-gold-500;
+        }
+
+        .skeleton-loader > * {
+            @apply opacity-0 transition-opacity duration-300;
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-navy-900/80 backdrop-blur-sm z-40 hidden lg:hidden"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 glass-card transform -translate-x-full transition-transform duration-300 lg:translate-x-0 lg:static lg:flex-shrink-0 flex flex-col h-full border-r border-navy-700">
+        <!-- Logo Area -->
+        <div class="h-16 flex items-center justify-between px-6 border-b border-navy-700">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-gold-500 flex items-center justify-center text-navy-900 font-bold">L</div>
+                <span class="font-semibold text-lg tracking-wide">Admin Portal</span>
+            </div>
+            <button id="sidebar-close" class="lg:hidden text-gray-400 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <!-- Navigation -->
+        <div class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+            <p class="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Main Menu</p>
+            
+            <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Dashboard</span>
+            </a>
+            
+            <a href="listings.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="building-2" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Listings</span>
+            </a>
+            
+            <a href="users.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="users" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Users</span>
+            </a>
+
+            <a href="categories-locations.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="map" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Categories & Loc</span>
+            </a>
+
+            <a href="packages.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="package" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Packages</span>
+            </a>
+
+            <p class="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-6">System</p>
+
+            <a href="reports.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="bar-chart-3" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Reports</span>
+            </a>
+
+            <a href="settings.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-gold-500/10 text-gold-600 dark:text-gold-400 transition-colors group">
+                <i data-lucide="settings" class="w-5 h-5"></i>
+                <span class="font-medium">Site Settings</span>
+            </a>
+        </div>
+
+        <!-- User Mini Profile -->
+        <div class="p-4 border-t border-navy-700">
+            <a href="profile.html" class="flex items-center gap-3 p-2 rounded-lg hover:bg-navy-700 transition-colors">
+                <img src="images/admin_profile.png" alt="Admin" class="w-10 h-10 rounded-full border-2 border-gold-500">
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-white truncate">Super Admin</p>
+                    <p class="text-xs text-gray-400 truncate">admin@luxury.com</p>
+                </div>
+            </a>
+            <button onclick="adminLogout()"
+                class="mt-1 flex items-center gap-3 w-full px-3 py-2 rounded-lg text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors text-sm font-medium">
+                <i data-lucide="log-out" class="w-4 h-4 flex-shrink-0"></i>
+                <span>Logout</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col min-w-0 bg-navy-900">
+        <!-- Top Header -->
+        <header class="h-16 glass-card sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 lg:px-8 border-b border-navy-700">
+            <div class="flex items-center gap-4">
+                <button id="sidebar-toggle" class="lg:hidden text-gray-400 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-gold-500">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+                <h1 class="text-xl font-semibold hidden sm:block">Site Settings</h1>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div id="notification-bell-container" class="relative"></div>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+            <form id="settings-form" novalidate class="max-w-4xl mx-auto space-y-10">
+                
+                <!-- General Settings -->
+                <div class="panel-card !p-0 overflow-hidden skeleton-loader animate-pulse bg-navy-700 text-transparent">
+                    <div class="bg-navy-800/50 border-b border-navy-700 px-6 lg:px-8 py-5">
+                        <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+                            <i data-lucide="sliders" class="w-5 h-5 text-gold-500"></i> General Preferences
+                        </h2>
+                        <p class="text-sm text-gray-400 mt-1">Manage global application settings like currency and pagination.</p>
+                    </div>
+
+                    <div class="p-6 lg:p-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="settings-currency" class="form-label">Default Currency</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 flex items-center justify-center pointer-events-none">
+                                    <i data-lucide="dollar-sign" class="w-4 h-4"></i>
+                                </span>
+                                <select id="settings-currency" name="currency" required class="form-input pl-10 appearance-none">
+                                    <option value="USD" selected>USD - US Dollar</option>
+                                    <option value="EUR">EUR - Euro</option>
+                                    <option value="GBP">GBP - British Pound</option>
+                                    <option value="AED">AED - UAE Dirham</option>
+                                </select>
+                                <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
+                                    <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="settings-page-size" class="form-label">Items per page</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 flex items-center justify-center pointer-events-none">
+                                    <i data-lucide="list" class="w-4 h-4"></i>
+                                </span>
+                                <input type="number" id="settings-page-size" name="page_size" required class="form-input pl-10 font-mono" value="20" min="10" max="100" step="10">
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">Number of rows in data tables.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Listings & Ads -->
+                <div class="panel-card !p-0 overflow-hidden skeleton-loader animate-pulse bg-navy-700 text-transparent">
+                    <div class="bg-navy-800/50 border-b border-navy-700 px-6 lg:px-8 py-5">
+                        <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+                            <i data-lucide="calendar" class="w-5 h-5 text-gold-500"></i> Listings Configuration
+                        </h2>
+                    </div>
+
+                    <div class="p-6 lg:p-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="settings-ad-expiry" class="form-label">Ad Expiry Duration (Days)</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 flex items-center justify-center pointer-events-none">
+                                    <i data-lucide="clock" class="w-4 h-4"></i>
+                                </span>
+                                <input type="number" id="settings-ad-expiry" name="ad_expiry" required class="form-input pl-10 font-mono" value="30" min="1" max="365">
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">Days before a standard listing expires.</p>
+                        </div>
+                        
+                        <div class="flex items-end">
+                            <label class="flex items-center gap-3 cursor-pointer group">
+                                <div class="relative">
+                                    <input type="checkbox" id="settings-auto-approve" name="auto_approve" class="sr-only" checked>
+                                    <div class="block w-14 h-8 bg-gold-500 rounded-full transition-colors"></div>
+                                    <div class="dot absolute left-1 top-1 bg-navy-900 w-6 h-6 rounded-full transition-transform transform translate-x-6"></div>
+                                </div>
+                                <span class="text-sm font-medium text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Auto-Approve Agent Listings</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Integrations -->
+                <div class="panel-card !p-0 overflow-hidden skeleton-loader animate-pulse bg-navy-700 text-transparent">
+                    <div class="bg-navy-800/50 border-b border-navy-700 px-6 lg:px-8 py-5">
+                        <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+                            <i data-lucide="credit-card" class="w-5 h-5 text-gold-500"></i> Payment Gateway (PayPal)
+                        </h2>
+                    </div>
+
+                    <div class="p-6 lg:p-8 space-y-6">
+                        <div>
+                            <label for="settings-paypal-client" class="form-label">Client ID</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 flex items-center justify-center pointer-events-none">
+                                    <i data-lucide="key" class="w-4 h-4"></i>
+                                </span>
+                                <input type="text" id="settings-paypal-client" name="paypal_client" class="form-input pl-10 font-mono text-sm" value="PayPal_Client_ID_Mock_Val_123">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="settings-paypal-secret" class="form-label">Secret Key</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 flex items-center justify-center pointer-events-none">
+                                    <i data-lucide="lock" class="w-4 h-4"></i>
+                                </span>
+                                <input type="password" id="settings-paypal-secret" name="paypal_secret" class="form-input pl-10 font-mono text-sm" value="PayPal_Secret_Key_Mock_Val_123">
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-4">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" id="paypal-mode-sandbox" name="paypal_mode" value="sandbox" class="w-4 h-4 text-gold-500 focus:ring-gold-500 border-navy-700 bg-navy-900" checked>
+                                <span class="text-sm text-gray-300">Sandbox (Testing)</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" id="paypal-mode-live" name="paypal_mode" value="live" class="w-4 h-4 text-gold-500 focus:ring-gold-500 border-navy-700 bg-navy-900">
+                                <span class="text-sm text-gray-300">Live (Production)</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex justify-end gap-4 pb-12 skeleton-loader animate-pulse dark:bg-transparent bg-transparent text-transparent">
+                    <button type="reset" id="settings-discard-btn" class="px-6 py-2.5 rounded-lg border border-navy-700 text-gray-300 hover:bg-navy-800 transition-colors font-medium">
+                        Discard Changes
+                    </button>
+                    <button type="submit" id="settings-save-btn" class="px-6 py-2.5 rounded-lg bg-gold-500 hover:bg-gold-600 text-navy-900 font-semibold transition-colors flex items-center gap-2 shadow-lg shadow-gold-500/20">
+                        <i data-lucide="save" class="w-4 h-4"></i> Save Settings
+                    </button>
+                </div>
+
+            </form>
+        </main>
+    </div>
+
+    <!-- Shared JS -->
+    <script src="js/shared.js"></script>
+
+    <!-- Site Settings Controller Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('settings-form');
+            const saveBtn = document.getElementById('settings-save-btn');
+            const discardBtn = document.getElementById('settings-discard-btn');
+            
+            // Checkbox and visual toggle elements
+            const autoApproveCheckbox = document.getElementById('settings-auto-approve');
+            const toggleBg = autoApproveCheckbox ? autoApproveCheckbox.nextElementSibling : null;
+            const toggleDot = toggleBg ? toggleBg.nextElementSibling : null;
+
+            // Form Fields
+            const fields = {
+                currency: document.getElementById('settings-currency'),
+                pageSize: document.getElementById('settings-page-size'),
+                adExpiry: document.getElementById('settings-ad-expiry'),
+                autoApprove: autoApproveCheckbox,
+                paypalClient: document.getElementById('settings-paypal-client'),
+                paypalSecret: document.getElementById('settings-paypal-secret')
+            };
+
+            // Original values store
+            let originalValues = {};
+
+            // Function to save current form state to originalValues
+            function captureOriginalValues() {
+                originalValues = {
+                    currency: fields.currency ? fields.currency.value : '',
+                    pageSize: fields.pageSize ? fields.pageSize.value : '',
+                    adExpiry: fields.adExpiry ? fields.adExpiry.value : '',
+                    autoApprove: fields.autoApprove ? fields.autoApprove.checked : false,
+                    paypalClient: fields.paypalClient ? fields.paypalClient.value : '',
+                    paypalSecret: fields.paypalSecret ? fields.paypalSecret.value : '',
+                    paypalMode: getPaypalModeValue()
+                };
+            }
+
+            function getPaypalModeValue() {
+                const checkedRadio = document.querySelector('input[name="paypal_mode"]:checked');
+                return checkedRadio ? checkedRadio.value : 'sandbox';
+            }
+
+            function setPaypalModeValue(value) {
+                const radio = document.querySelector(`input[name="paypal_mode"][value="${value}"]`);
+                if (radio) radio.checked = true;
+            }
+
+            // Visual toggle update helper
+            function updateToggleVisual() {
+                if (!autoApproveCheckbox || !toggleBg || !toggleDot) return;
+                if (autoApproveCheckbox.checked) {
+                    toggleBg.className = 'block w-14 h-8 bg-gold-500 rounded-full transition-colors';
+                    toggleDot.className = 'dot absolute left-1 top-1 bg-navy-900 w-6 h-6 rounded-full transition-transform transform translate-x-6';
+                } else {
+                    toggleBg.className = 'block w-14 h-8 bg-navy-700 rounded-full transition-colors';
+                    toggleDot.className = 'dot absolute left-1 top-1 bg-navy-900 w-6 h-6 rounded-full transition-transform transform';
+                }
+            }
+
+            if (autoApproveCheckbox) {
+                autoApproveCheckbox.addEventListener('change', updateToggleVisual);
+            }
+
+            // Load settings from API
+            window.adminFetch('GET', '/api/admin/settings').then(r => r.json()).then(data => {
+                if (fields.currency && data.currency) fields.currency.value = data.currency;
+                if (fields.pageSize && data.page_size) fields.pageSize.value = data.page_size;
+                if (fields.adExpiry && data.ad_expiry) fields.adExpiry.value = data.ad_expiry;
+                if (fields.autoApprove && data.auto_approve !== undefined) { fields.autoApprove.checked = data.auto_approve === 'true'; }
+                if (fields.paypalClient && data.paypal_client) fields.paypalClient.value = data.paypal_client;
+                if (fields.paypalSecret && data.paypal_secret) fields.paypalSecret.value = data.paypal_secret;
+                if (data.paypal_mode) setPaypalModeValue(data.paypal_mode);
+                setTimeout(() => { captureOriginalValues(); updateToggleVisual(); }, 50);
+            }).catch(() => {
+                setTimeout(() => { captureOriginalValues(); updateToggleVisual(); }, 100);
+            });
+
+            // Error display helper
+            function showFieldError(input, message) {
+                input.classList.add('border-red-500');
+                const err = document.createElement('p');
+                err.className = 'error-msg text-red-500 text-xs mt-1';
+                err.innerText = message;
+                input.parentElement.appendChild(err);
+            }
+
+            function clearErrors() {
+                form.querySelectorAll('.error-msg').forEach(el => el.remove());
+                form.querySelectorAll('.border-red-500').forEach(el => el.classList.remove('border-red-500'));
+            }
+
+            // Form Submit / Save Settings
+            if (form) {
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    clearErrors();
+
+                    let isValid = true;
+
+                    // 1. Currency validation
+                    if (fields.currency && !fields.currency.value.trim()) {
+                        isValid = false;
+                        showFieldError(fields.currency, 'Default currency is required');
+                    }
+
+                    // 2. Page Size validation
+                    if (fields.pageSize) {
+                        const val = fields.pageSize.value.trim();
+                        if (!val) {
+                            isValid = false;
+                            showFieldError(fields.pageSize, 'Items per page is required');
+                        } else if (isNaN(parseInt(val)) || parseInt(val) < 1) {
+                            isValid = false;
+                            showFieldError(fields.pageSize, 'Must be a valid positive number');
+                        }
+                    }
+
+                    // 3. Ad Expiry validation
+                    if (fields.adExpiry) {
+                        const val = fields.adExpiry.value.trim();
+                        if (!val) {
+                            isValid = false;
+                            showFieldError(fields.adExpiry, 'Ad expiry duration is required');
+                        } else if (isNaN(parseInt(val)) || parseInt(val) < 1) {
+                            isValid = false;
+                            showFieldError(fields.adExpiry, 'Must be a valid positive number');
+                        }
+                    }
+
+                    // 4. PayPal Client ID validation (optional but format check if filled)
+                    if (fields.paypalClient) {
+                        const val = fields.paypalClient.value.trim();
+                        if (val && !/^[a-zA-Z0-9_-]{10,}$/.test(val)) {
+                            isValid = false;
+                            showFieldError(fields.paypalClient, 'Invalid PayPal Client ID format (min 10 characters, no spaces/symbols)');
+                        }
+                    }
+
+                    // 5. PayPal Secret Key validation (optional but format check if filled)
+                    if (fields.paypalSecret) {
+                        const val = fields.paypalSecret.value.trim();
+                        if (val && !/^[a-zA-Z0-9_-]{10,}$/.test(val)) {
+                            isValid = false;
+                            showFieldError(fields.paypalSecret, 'Invalid PayPal Secret Key format (min 10 characters, no spaces/symbols)');
+                        }
+                    }
+
+                    if (!isValid) {
+                        window.showToast('Please fix the errors in the form', 'error');
+                        return;
+                    }
+
+                    // Validation passed, show spinner state
+                    const originalText = saveBtn.innerHTML;
+                    saveBtn.disabled = true;
+                    saveBtn.classList.add('opacity-75', 'cursor-not-allowed');
+                    saveBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin inline mr-1"></i> Saving...';
+                    if (window.lucide) lucide.createIcons();
+
+                    // Real API save
+                    const settingsPayload = {};
+                    if (fields.currency) settingsPayload.currency = fields.currency.value;
+                    if (fields.pageSize) settingsPayload.page_size = fields.pageSize.value;
+                    if (fields.adExpiry) settingsPayload.ad_expiry = fields.adExpiry.value;
+                    if (fields.autoApprove) settingsPayload.auto_approve = fields.autoApprove.checked ? 'true' : 'false';
+                    if (fields.paypalClient) settingsPayload.paypal_client = fields.paypalClient.value;
+                    if (fields.paypalSecret) settingsPayload.paypal_secret = fields.paypalSecret.value;
+                    settingsPayload.paypal_mode = getPaypalModeValue();
+
+                    window.adminFetch('PUT', '/api/admin/settings', settingsPayload)
+                        .then(r => r.ok ? r.json() : Promise.reject())
+                        .then(() => {
+                            captureOriginalValues();
+                            window.showToast('Settings saved successfully', 'success');
+                        })
+                        .catch(() => window.showToast('Failed to save settings', 'error'))
+                        .finally(() => {
+                            saveBtn.disabled = false;
+                            saveBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                            saveBtn.innerHTML = originalText;
+                            if (window.lucide) lucide.createIcons();
+                        });
+                });
+
+                // Discard changes reset handler
+                form.addEventListener('reset', (e) => {
+                    e.preventDefault();
+                    clearErrors();
+
+                    // Restore fields to original state
+                    if (fields.currency) fields.currency.value = originalValues.currency;
+                    if (fields.pageSize) fields.pageSize.value = originalValues.pageSize;
+                    if (fields.adExpiry) fields.adExpiry.value = originalValues.adExpiry;
+                    if (fields.autoApprove) {
+                        fields.autoApprove.checked = originalValues.autoApprove;
+                        updateToggleVisual();
+                    }
+                    if (fields.paypalClient) fields.paypalClient.value = originalValues.paypalClient;
+                    if (fields.paypalSecret) fields.paypalSecret.value = originalValues.paypalSecret;
+                    setPaypalModeValue(originalValues.paypalMode);
+
+                    window.showToast('Changes discarded', 'success');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

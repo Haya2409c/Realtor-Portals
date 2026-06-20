@@ -49,8 +49,12 @@ namespace RealtorsPortal.Controllers
 
             if (!ModelState.IsValid) return View(model);
 
+            // Resolve email → username so admin (UserName="admin") and regular users both work
+            var loginUser = await _userManager.FindByEmailAsync(model.Email);
+            var usernameToUse = loginUser?.UserName ?? model.Email;
+
             var result = await _signInManager.PasswordSignInAsync(
-                model.Email, model.Password, model.RememberMe, lockoutOnFailure: true);
+                usernameToUse, model.Password, model.RememberMe, lockoutOnFailure: true);
 
             if (result.Succeeded)
             {

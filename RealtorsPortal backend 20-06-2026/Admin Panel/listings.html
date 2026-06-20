@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listings Management - Admin Portal</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        navy: {
+                            900: '#060B19',
+                            800: '#0B132B',
+                            700: '#1C2541',
+                            600: '#3A506B',
+                        },
+                        gold: {
+                            400: '#F1C40F',
+                            500: '#D4AF37',
+                            600: '#AA8C2C',
+                        }
+                    },
+                    boxShadow: {
+                        'premium': '0 10px 30px -10px rgba(0, 0, 0, 0.5)',
+                        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.1)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        /* Base styles */
+        body {
+            @apply bg-navy-900 text-white transition-colors duration-300 overflow-x-hidden;
+        }
+
+        /* Subtle Glassmorphism Utilities */
+        .glass-card { @apply bg-navy-800/80 backdrop-blur-md border border-navy-700 shadow-glass; }
+        
+        /* Table Styles */
+        .glass-table th { @apply bg-navy-800/80 font-medium text-xs tracking-wider text-gray-400 uppercase py-3 px-6 text-left border-b border-navy-700 whitespace-nowrap; }
+        .glass-table td { @apply py-4 px-6 border-b border-navy-700/50 text-sm text-gray-300; }
+
+        @layer components {
+            .panel-card { @apply bg-navy-800/50 backdrop-blur-sm border border-navy-700 rounded-xl p-6; }
+            .form-input { @apply w-full bg-navy-900 border border-navy-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500 transition-colors placeholder-gray-500; }
+            .form-label { @apply block text-sm font-medium text-gray-300 mb-2; }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            @apply bg-transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            @apply bg-navy-700 rounded-full;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            @apply bg-gold-500;
+        }
+
+        .skeleton-loader > * {
+            @apply opacity-0 transition-opacity duration-300;
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-navy-900/80 backdrop-blur-sm z-40 hidden lg:hidden"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 glass-card transform -translate-x-full transition-transform duration-300 lg:translate-x-0 lg:static lg:flex-shrink-0 flex flex-col h-full border-r border-navy-700">
+        <!-- Logo Area -->
+        <div class="h-16 flex items-center justify-between px-6 border-b border-navy-700">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-gold-500 flex items-center justify-center text-navy-900 font-bold">L</div>
+                <span class="font-semibold text-lg tracking-wide">Admin Portal</span>
+            </div>
+            <button id="sidebar-close" class="lg:hidden text-gray-400 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <!-- Navigation -->
+        <div class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+            <p class="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Main Menu</p>
+            
+            <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Dashboard</span>
+            </a>
+            
+            <a href="listings.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-gold-500/10 text-gold-600 dark:text-gold-400 transition-colors group">
+                <i data-lucide="building-2" class="w-5 h-5"></i>
+                <span class="font-medium">Listings</span>
+            </a>
+            
+            <a href="users.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="users" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Users</span>
+            </a>
+
+            <a href="categories-locations.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="map" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Categories & Loc</span>
+            </a>
+
+            <a href="packages.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="package" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Packages</span>
+            </a>
+
+            <p class="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-6">System</p>
+
+            <a href="reports.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="bar-chart-3" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Reports</span>
+            </a>
+
+            <a href="settings.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="settings" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Site Settings</span>
+            </a>
+        </div>
+
+<!-- User Mini Profile -->
+        <div class="p-4 border-t border-navy-700">
+            <a href="profile.html" class="flex items-center gap-3 p-2 rounded-lg hover:bg-navy-700 transition-colors">
+                <img src="images/admin_profile.png" alt="Admin" class="w-10 h-10 rounded-full border-2 border-gold-500">
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-white truncate">Super Admin</p>
+                    <p class="text-xs text-gray-400 truncate">admin@luxury.com</p>
+                </div>
+            </a>
+            <button onclick="adminLogout()"
+                class="mt-1 flex items-center gap-3 w-full px-3 py-2 rounded-lg text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors text-sm font-medium">
+                <i data-lucide="log-out" class="w-4 h-4 flex-shrink-0"></i>
+                <span>Logout</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col min-w-0 bg-navy-900">
+        <!-- Top Header -->
+        <header class="h-16 glass-card sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 lg:px-8 border-b border-navy-700">
+            <div class="flex items-center gap-4">
+                <button id="sidebar-toggle" class="lg:hidden text-gray-400 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-gold-500">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+                <h1 class="text-xl font-semibold hidden sm:block">Listings Management</h1>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div id="notification-bell-container" class="relative"></div>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 flex flex-col">
+            
+            <!-- Filters Row -->
+            <div class="glass-card rounded-2xl p-4 mb-6 skeleton-loader animate-pulse bg-navy-700 text-transparent">
+                <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
+                    <div class="w-full md:w-1/3 relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 flex items-center justify-center pointer-events-none">
+                            <i data-lucide="search" class="w-4 h-4"></i>
+                        </span>
+                        <input type="text" placeholder="Search by ID, title, or user..." class="form-input pl-10" data-table-search="listings-table">
+                    </div>
+                    
+                    <div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+                        <select class="form-input md:w-40 appearance-none" data-table-filter-status="listings-table">
+                            <option value="">All Statuses</option>
+                            <option value="pending">Pending Approval</option>
+                            <option value="active">Active</option>
+                            <option value="rejected">Rejected</option>
+                            <option value="expired">Expired</option>
+                        </select>
+                        <select class="form-input md:w-40 appearance-none" data-table-filter-category="listings-table">
+                            <option value="">All Categories</option>
+                            <option value="villas">Villas</option>
+                            <option value="apartments">Apartments</option>
+                            <option value="commercial">Commercial</option>
+                        </select>
+                        <button class="px-4 py-2 bg-gold-500 hover:bg-gold-600 disabled:opacity-50 disabled:cursor-not-allowed text-navy-900 rounded-lg transition-colors flex items-center justify-center gap-2 font-medium" data-table-filter-trigger="listings-table">
+                            <i data-lucide="filter" class="w-4 h-4"></i> Apply
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="glass-card rounded-2xl flex-1 overflow-hidden skeleton-loader animate-pulse bg-navy-700 text-transparent flex flex-col min-h-[400px]">
+                <div class="overflow-x-auto flex-1">
+                    <table id="listings-table" data-page-size="10" class="w-full text-left border-collapse glass-table min-w-[800px]">
+                        <thead>
+                            <tr>
+                                <th class="w-16 text-center" data-sort>ID</th>
+                                <th>Listing Details</th>
+                                <th>User</th>
+                                <th>Category / Location</th>
+                                <th>Submitted On</th>
+                                <th>Status</th>
+                                <th class="text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listings-tbody">
+                            <!-- Row 1 -->
+                            <tr data-status="pending" data-category="villas" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors group">
+                                <td class="text-center font-mono text-gray-400">#8291</td>
+                                <td>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-lg bg-gray-200 dark:bg-navy-700 flex-shrink-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80');"></div>
+                                        <div>
+                                            <p class="font-medium text-white group-hover:text-gold-500 transition-colors cursor-pointer">Modern Beverly Hills Mansion</p>
+                                            <p class="text-xs text-gray-400 mt-0.5 font-mono">$12,500,000</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="text-sm font-medium text-white">Alex Johnson</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Agent</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-gray-300">Luxury Villas</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Beverly Hills, CA</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-gray-300 font-mono text-xs">2026-06-16</p>
+                                    <p class="text-xs text-gray-400 mt-0.5 font-mono text-xs">10:45 AM</p>
+                                </td>
+                                <td>
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-500/10 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20">
+                                        Pending
+                                    </span>
+                                </td>
+                                <td class="text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button class="p-1.5 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded transition-colors" title="Approve"><i data-lucide="check" class="w-4 h-4"></i></button>
+                                        <button class="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded transition-colors" title="Reject"><i data-lucide="x" class="w-4 h-4"></i></button>
+                                        <button class="p-1.5 text-gray-400 hover:text-white transition-colors ml-2" title="View Details"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- Row 2 -->
+                            <tr data-status="active" data-category="apartments" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors group">
+                                <td class="text-center font-mono text-gray-400">#8288</td>
+                                <td>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-lg bg-gray-200 dark:bg-navy-700 flex-shrink-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80');"></div>
+                                        <div>
+                                            <p class="font-medium text-white group-hover:text-gold-500 transition-colors cursor-pointer">Downtown Penthouse</p>
+                                            <p class="text-xs text-gray-400 mt-0.5 font-mono">$4,200 / mo</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="text-sm font-medium text-white">Sarah Jenkins</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Private Seller</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-gray-300">Apartments</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Manhattan, NY</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-gray-300 font-mono text-xs">2026-06-15</p>
+                                    <p class="text-xs text-gray-400 mt-0.5 font-mono text-xs">03:15 PM</p>
+                                </td>
+                                <td>
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
+                                        Active
+                                    </span>
+                                </td>
+                                <td class="text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button class="p-1.5 text-gray-400 hover:text-red-500 transition-colors" title="Suspend"><i data-lucide="pause-circle" class="w-4 h-4"></i></button>
+                                        <button class="p-1.5 text-gray-400 hover:text-white transition-colors" title="View Details"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- Row 3 -->
+                            <tr data-status="rejected" data-category="apartments" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors group">
+                                <td class="text-center font-mono text-gray-400">#8280</td>
+                                <td>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-lg bg-gray-200 dark:bg-navy-700 flex-shrink-0 flex items-center justify-center text-gray-400">
+                                            <i data-lucide="image-off" class="w-5 h-5"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-white group-hover:text-gold-500 transition-colors cursor-pointer">Spacious Studio - SCAM</p>
+                                            <p class="text-xs text-gray-400 mt-0.5 font-mono">$500 / mo</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="text-sm font-medium text-red-500">John Doe (Banned)</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Private Seller</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-gray-300">Apartments</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">London, UK</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-gray-300 font-mono text-xs">2026-06-12</p>
+                                    <p class="text-xs text-gray-400 mt-0.5 font-mono text-xs">09:00 AM</p>
+                                </td>
+                                <td>
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-red-100 text-red-800 dark:bg-red-500/10 dark:text-red-400 border border-red-200 dark:border-red-500/20">
+                                        Rejected
+                                    </span>
+                                </td>
+                                <td class="text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button class="p-1.5 text-gray-400 hover:text-white transition-colors" title="View Details"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- Row 4 -->
+                            <tr data-status="active" data-category="villas" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors group">
+                                <td class="text-center font-mono text-gray-400">#8275</td>
+                                <td>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-lg bg-gray-200 dark:bg-navy-700 flex-shrink-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1580587771525-78b9dba3b914?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80');"></div>
+                                        <div>
+                                            <p class="font-medium text-white group-hover:text-gold-500 transition-colors cursor-pointer">Sunset Strip Contemporary</p>
+                                            <p class="text-xs text-gray-400 mt-0.5 font-mono">$8,900,000</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="text-sm font-medium text-white">Michael Scott</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Agent</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-gray-300">Luxury Villas</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Los Angeles, CA</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-gray-300 font-mono text-xs">2026-06-10</p>
+                                    <p class="text-xs text-gray-400 mt-0.5 font-mono text-xs">11:30 AM</p>
+                                </td>
+                                <td>
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
+                                        Active
+                                    </span>
+                                </td>
+                                <td class="text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button class="p-1.5 text-gray-400 hover:text-red-500 transition-colors" title="Suspend"><i data-lucide="pause-circle" class="w-4 h-4"></i></button>
+                                        <button class="p-1.5 text-gray-400 hover:text-white transition-colors" title="View Details"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- Row 5 -->
+                            <tr data-status="expired" data-category="commercial" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors group">
+                                <td class="text-center font-mono text-gray-400">#8272</td>
+                                <td>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-lg bg-gray-200 dark:bg-navy-700 flex-shrink-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80');"></div>
+                                        <div>
+                                            <p class="font-medium text-white group-hover:text-gold-500 transition-colors cursor-pointer">Premium Retail Block</p>
+                                            <p class="text-xs text-gray-400 mt-0.5 font-mono">$25,000 / mo</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="text-sm font-medium text-white">David Wallace</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Private Seller</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-gray-300">Commercial</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Chicago, IL</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-gray-300 font-mono text-xs">2026-06-08</p>
+                                    <p class="text-xs text-gray-400 mt-0.5 font-mono text-xs">02:20 PM</p>
+                                </td>
+                                <td>
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-800 dark:bg-navy-900/20 dark:text-gray-400 border border-navy-700">
+                                        Expired
+                                    </span>
+                                </td>
+                                <td class="text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button class="p-1.5 text-gray-400 hover:text-white transition-colors" title="View Details"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- Row 6 -->
+                            <tr data-status="active" data-category="villas" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors group">
+                                <td class="text-center font-mono text-gray-400">#8269</td>
+                                <td>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-lg bg-gray-200 dark:bg-navy-700 flex-shrink-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1512915922686-57c11dde9b6b?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80');"></div>
+                                        <div>
+                                            <p class="font-medium text-white group-hover:text-gold-500 transition-colors cursor-pointer">Oceanfront Haven</p>
+                                            <p class="text-xs text-gray-400 mt-0.5 font-mono">$15,400,000</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="text-sm font-medium text-white">Sarah Jenkins</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Private Seller</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-gray-300">Luxury Villas</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Malibu, CA</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-gray-300 font-mono text-xs">2026-06-05</p>
+                                    <p class="text-xs text-gray-400 mt-0.5 font-mono text-xs">08:50 AM</p>
+                                </td>
+                                <td>
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
+                                        Active
+                                    </span>
+                                </td>
+                                <td class="text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button class="p-1.5 text-gray-400 hover:text-red-500 transition-colors" title="Suspend"><i data-lucide="pause-circle" class="w-4 h-4"></i></button>
+                                        <button class="p-1.5 text-gray-400 hover:text-white transition-colors" title="View Details"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- Row 7 -->
+                            <tr data-status="pending" data-category="apartments" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors group">
+                                <td class="text-center font-mono text-gray-400">#8265</td>
+                                <td>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-lg bg-gray-200 dark:bg-navy-700 flex-shrink-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80');"></div>
+                                        <div>
+                                            <p class="font-medium text-white group-hover:text-gold-500 transition-colors cursor-pointer">Minimalist Loft</p>
+                                            <p class="text-xs text-gray-400 mt-0.5 font-mono">$3,100 / mo</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="text-sm font-medium text-white">Dwight Schrute</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Agent</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-gray-300">Apartments</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Scranton, PA</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-gray-300 font-mono text-xs">2026-06-03</p>
+                                    <p class="text-xs text-gray-400 mt-0.5 font-mono text-xs">01:10 PM</p>
+                                </td>
+                                <td>
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-500/10 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20">
+                                        Pending
+                                    </span>
+                                </td>
+                                <td class="text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button class="p-1.5 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded transition-colors" title="Approve"><i data-lucide="check" class="w-4 h-4"></i></button>
+                                        <button class="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded transition-colors" title="Reject"><i data-lucide="x" class="w-4 h-4"></i></button>
+                                        <button class="p-1.5 text-gray-400 hover:text-white transition-colors ml-2" title="View Details"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- Row 8 -->
+                            <tr data-status="active" data-category="commercial" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors group">
+                                <td class="text-center font-mono text-gray-400">#8260</td>
+                                <td>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-lg bg-gray-200 dark:bg-navy-700 flex-shrink-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80');"></div>
+                                        <div>
+                                            <p class="font-medium text-white group-hover:text-gold-500 transition-colors cursor-pointer">Downtown Office Plaza</p>
+                                            <p class="text-xs text-gray-400 mt-0.5 font-mono">$45,000,000</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="text-sm font-medium text-white">Angela Martin</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Agent</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-gray-300">Commercial</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Boston, MA</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-gray-300 font-mono text-xs">2026-06-01</p>
+                                    <p class="text-xs text-gray-400 mt-0.5 font-mono text-xs">05:40 PM</p>
+                                </td>
+                                <td>
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
+                                        Active
+                                    </span>
+                                </td>
+                                <td class="text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button class="p-1.5 text-gray-400 hover:text-red-500 transition-colors" title="Suspend"><i data-lucide="pause-circle" class="w-4 h-4"></i></button>
+                                        <button class="p-1.5 text-gray-400 hover:text-white transition-colors" title="View Details"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- Row 9 -->
+                            <tr data-status="active" data-category="villas" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors group">
+                                <td class="text-center font-mono text-gray-400">#8255</td>
+                                <td>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-lg bg-gray-200 dark:bg-navy-700 flex-shrink-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1513584684374-8bab748fbf90?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80');"></div>
+                                        <div>
+                                            <p class="font-medium text-white group-hover:text-gold-500 transition-colors cursor-pointer">Tuscan Style Estate</p>
+                                            <p class="text-xs text-gray-400 mt-0.5 font-mono">$6,800,000</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="text-sm font-medium text-white">Jim Halpert</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Agent</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-gray-300">Luxury Villas</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Miami, FL</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-gray-300 font-mono text-xs">2026-05-28</p>
+                                    <p class="text-xs text-gray-400 mt-0.5 font-mono text-xs">10:00 AM</p>
+                                </td>
+                                <td>
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
+                                        Active
+                                    </span>
+                                </td>
+                                <td class="text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button class="p-1.5 text-gray-400 hover:text-red-500 transition-colors" title="Suspend"><i data-lucide="pause-circle" class="w-4 h-4"></i></button>
+                                        <button class="p-1.5 text-gray-400 hover:text-white transition-colors" title="View Details"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- Row 10 -->
+                            <tr data-status="rejected" data-category="villas" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors group">
+                                <td class="text-center font-mono text-gray-400">#8250</td>
+                                <td>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-lg bg-gray-200 dark:bg-navy-700 flex-shrink-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1507089947368-19c1da9775ae?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80');"></div>
+                                        <div>
+                                            <p class="font-medium text-white group-hover:text-gold-500 transition-colors cursor-pointer">Overpriced Cabin</p>
+                                            <p class="text-xs text-gray-400 mt-0.5 font-mono">$2,500,000</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="text-sm font-medium text-white">Ryan Howard</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Private Seller</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-gray-300">Luxury Villas</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Aspen, CO</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-gray-300 font-mono text-xs">2026-05-25</p>
+                                    <p class="text-xs text-gray-400 mt-0.5 font-mono text-xs">04:15 PM</p>
+                                </td>
+                                <td>
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-red-100 text-red-800 dark:bg-red-500/10 dark:text-red-400 border border-red-200 dark:border-red-500/20">
+                                        Rejected
+                                    </span>
+                                </td>
+                                <td class="text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button class="p-1.5 text-gray-400 hover:text-white transition-colors" title="View Details"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- Row 11 -->
+                            <tr data-status="active" data-category="apartments" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors group">
+                                <td class="text-center font-mono text-gray-400">#8245</td>
+                                <td>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-lg bg-gray-200 dark:bg-navy-700 flex-shrink-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80');"></div>
+                                        <div>
+                                            <p class="font-medium text-white group-hover:text-gold-500 transition-colors cursor-pointer">Skyscraper Flat</p>
+                                            <p class="text-xs text-gray-400 mt-0.5 font-mono">$6,500 / mo</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="text-sm font-medium text-white">Pam Beesly</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Agent</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-gray-300">Apartments</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">New York, NY</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-gray-300 font-mono text-xs">2026-05-22</p>
+                                    <p class="text-xs text-gray-400 mt-0.5 font-mono text-xs">11:00 AM</p>
+                                </td>
+                                <td>
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
+                                        Active
+                                    </span>
+                                </td>
+                                <td class="text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button class="p-1.5 text-gray-400 hover:text-red-500 transition-colors" title="Suspend"><i data-lucide="pause-circle" class="w-4 h-4"></i></button>
+                                        <button class="p-1.5 text-gray-400 hover:text-white transition-colors" title="View Details"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- Row 12 -->
+                            <tr data-status="expired" data-category="villas" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors group">
+                                <td class="text-center font-mono text-gray-400">#8240</td>
+                                <td>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-lg bg-gray-200 dark:bg-navy-700 flex-shrink-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80');"></div>
+                                        <div>
+                                            <p class="font-medium text-white group-hover:text-gold-500 transition-colors cursor-pointer">Historic Manor House</p>
+                                            <p class="text-xs text-gray-400 mt-0.5 font-mono">$11,200,000</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="text-sm font-medium text-white">Robert California</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Agent</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-gray-300">Luxury Villas</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Philadelphia, PA</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-gray-300 font-mono text-xs">2026-05-20</p>
+                                    <p class="text-xs text-gray-400 mt-0.5 font-mono text-xs">02:30 PM</p>
+                                </td>
+                                <td>
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-800 dark:bg-navy-900/20 dark:text-gray-400 border border-navy-700">
+                                        Expired
+                                    </span>
+                                </td>
+                                <td class="text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button class="p-1.5 text-gray-400 hover:text-white transition-colors" title="View Details"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- Row 13 -->
+                            <tr data-status="active" data-category="commercial" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors group">
+                                <td class="text-center font-mono text-gray-400">#8235</td>
+                                <td>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-lg bg-gray-200 dark:bg-navy-700 flex-shrink-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1504297050568-910d24c426d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80');"></div>
+                                        <div>
+                                            <p class="font-medium text-white group-hover:text-gold-500 transition-colors cursor-pointer">Industrial Warehouse</p>
+                                            <p class="text-xs text-gray-400 mt-0.5 font-mono">$12,000 / mo</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="text-sm font-medium text-white">Oscar Martinez</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Agent</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-gray-300">Commercial</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Dallas, TX</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-gray-300 font-mono text-xs">2026-05-18</p>
+                                    <p class="text-xs text-gray-400 mt-0.5 font-mono text-xs">09:15 AM</p>
+                                </td>
+                                <td>
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
+                                        Active
+                                    </span>
+                                </td>
+                                <td class="text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button class="p-1.5 text-gray-400 hover:text-red-500 transition-colors" title="Suspend"><i data-lucide="pause-circle" class="w-4 h-4"></i></button>
+                                        <button class="p-1.5 text-gray-400 hover:text-white transition-colors" title="View Details"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- Row 14 -->
+                            <tr data-status="pending" data-category="villas" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors group">
+                                <td class="text-center font-mono text-gray-400">#8230</td>
+                                <td>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-lg bg-gray-200 dark:bg-navy-700 flex-shrink-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80');"></div>
+                                        <div>
+                                            <p class="font-medium text-white group-hover:text-gold-500 transition-colors cursor-pointer">Modernist Desert Retreat</p>
+                                            <p class="text-xs text-gray-400 mt-0.5 font-mono">$7,400,000</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="text-sm font-medium text-white">Kelly Kapoor</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Agent</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-gray-300">Luxury Villas</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Phoenix, AZ</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-gray-300 font-mono text-xs">2026-05-15</p>
+                                    <p class="text-xs text-gray-400 mt-0.5 font-mono text-xs">03:45 PM</p>
+                                </td>
+                                <td>
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-500/10 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20">
+                                        Pending
+                                    </span>
+                                </td>
+                                <td class="text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button class="p-1.5 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded transition-colors" title="Approve"><i data-lucide="check" class="w-4 h-4"></i></button>
+                                        <button class="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded transition-colors" title="Reject"><i data-lucide="x" class="w-4 h-4"></i></button>
+                                        <button class="p-1.5 text-gray-400 hover:text-white transition-colors ml-2" title="View Details"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- Row 15 -->
+                            <tr data-status="active" data-category="apartments" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors group">
+                                <td class="text-center font-mono text-gray-400">#8225</td>
+                                <td>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-lg bg-gray-200 dark:bg-navy-700 flex-shrink-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80');"></div>
+                                        <div>
+                                            <p class="font-medium text-white group-hover:text-gold-500 transition-colors cursor-pointer">Cosy Canal Studio</p>
+                                            <p class="text-xs text-gray-400 mt-0.5 font-mono">$1,800 / mo</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="text-sm font-medium text-white">Toby Flenderson</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Private Seller</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-gray-300">Apartments</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Amsterdam, NL</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm text-gray-300 font-mono text-xs">2026-05-12</p>
+                                    <p class="text-xs text-gray-400 mt-0.5 font-mono text-xs">10:30 AM</p>
+                                </td>
+                                <td>
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
+                                        Active
+                                    </span>
+                                </td>
+                                <td class="text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button class="p-1.5 text-gray-400 hover:text-red-500 transition-colors" title="Suspend"><i data-lucide="pause-circle" class="w-4 h-4"></i></button>
+                                        <button class="p-1.5 text-gray-400 hover:text-white transition-colors" title="View Details"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                <div data-table-pagination="listings-table" class="px-6 py-4 border-t border-navy-700 flex items-center justify-between">
+                    <p class="text-sm text-gray-400">Showing <span class="font-medium text-white pagination-start">1</span> to <span class="font-medium text-white pagination-end">10</span> of <span class="font-medium text-white pagination-total">15</span> entries</p>
+                    <div class="flex gap-1 pagination-buttons">
+                        <!-- Dynamically populated by shared.js -->
+                    </div>
+                </div>
+            </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Shared JS -->
+    <script src="js/shared.js"></script>
+
+    <!-- Listings API Script -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var tbody = document.getElementById('listings-tbody');
+        var statusFilter = document.querySelector('[data-table-filter-status="listings-table"]');
+        var applyBtn = document.querySelector('[data-table-filter-trigger="listings-table"]');
+        var currentStatus = '';
+
+        function statusBadge(s) {
+            var map = {
+                'Active':   'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+                'Pending':  'bg-amber-500/10 text-amber-400 border-amber-500/20',
+                'Rejected': 'bg-red-500/10 text-red-400 border-red-200/20'
+            };
+            var cls = map[s] || 'bg-navy-900/20 text-gray-400 border-navy-700';
+            return '<span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium border ' + cls + '">' + (s||'Unknown') + '</span>';
+        }
+
+        function actionBtns(id, status) {
+            var approve = status === 'Pending' ? '<button onclick="approveListing(' + id + ',this)" class="p-1.5 text-emerald-400 hover:bg-emerald-500/10 rounded transition-colors" title="Approve"><i data-lucide="check" class="w-4 h-4"></i></button>' : '';
+            var reject  = status === 'Pending' ? '<button onclick="rejectListing(' + id + ',this)" class="p-1.5 text-red-400 hover:bg-red-500/10 rounded transition-colors" title="Reject"><i data-lucide="x" class="w-4 h-4"></i></button>' : '';
+            var del     = '<button onclick="deleteListing(' + id + ',this)" class="p-1.5 text-gray-400 hover:text-red-400 transition-colors ml-1" title="Delete"><i data-lucide="trash-2" class="w-4 h-4"></i></button>';
+            return '<div class="flex items-center justify-end gap-1">' + approve + reject + del + '</div>';
+        }
+
+        function renderListings(items) {
+            if (!tbody) return;
+            if (!items || items.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-10 text-gray-400">No listings found.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = items.map(function(p) {
+                var date = p.listedDate ? new Date(p.listedDate).toISOString().split('T')[0] : '—';
+                var thumb = p.thumbnailUrl ? 'style="background-image:url(\'' + p.thumbnailUrl + '\')"' : '';
+                return '<tr data-id="' + p.id + '" class="hover:bg-navy-900/50 transition-colors group">' +
+                    '<td class="text-center font-mono text-gray-400">#' + p.id + '</td>' +
+                    '<td><div class="flex items-center gap-3"><div class="w-12 h-12 rounded-lg bg-navy-700 flex-shrink-0 bg-cover bg-center" ' + thumb + '></div>' +
+                    '<div><p class="font-medium text-white group-hover:text-gold-500 transition-colors">' + (p.title||'') + '</p>' +
+                    '<p class="text-xs text-gray-400 font-mono">$' + (p.price ? p.price.toLocaleString() : '0') + '</p></div></div></td>' +
+                    '<td><p class="text-sm text-white">' + (p.agent||p.sellerId||'—') + '</p><p class="text-xs text-gray-400">' + (p.propertyType||'') + '</p></td>' +
+                    '<td><p class="text-sm text-gray-300">' + (p.category||'—') + '</p></td>' +
+                    '<td><p class="text-xs font-mono text-gray-300">' + date + '</p></td>' +
+                    '<td>' + statusBadge(p.approvalStatus) + '</td>' +
+                    '<td class="text-right">' + actionBtns(p.id, p.approvalStatus) + '</td>' +
+                    '</tr>';
+            }).join('');
+            if (window.lucide) lucide.createIcons();
+            if (window.initTablePagination) window.initTablePagination('listings-table');
+        }
+
+        function loadListings(status) {
+            var url = '/api/admin/listings?pageSize=50' + (status ? '&status=' + status : '');
+            if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-center py-10 text-gray-400">Loading...</td></tr>';
+            window.adminFetch('GET', url).then(function(r) { return r.json(); }).then(function(d) {
+                renderListings(d.items || []);
+            }).catch(function() {
+                if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-center py-10 text-red-400">Failed to load listings.</td></tr>';
+            });
+        }
+
+        window.approveListing = function(id, btn) {
+            if (!confirm('Approve this listing?')) return;
+            window.adminFetch('PUT', '/api/admin/listings/' + id + '/approve').then(function(r) {
+                if (r.ok) { loadListings(currentStatus); window.showToast('Listing approved', 'success'); }
+                else window.showToast('Failed to approve', 'error');
+            });
+        };
+
+        window.rejectListing = function(id, btn) {
+            if (!confirm('Reject this listing?')) return;
+            window.adminFetch('PUT', '/api/admin/listings/' + id + '/reject', {}).then(function(r) {
+                if (r.ok) { loadListings(currentStatus); window.showToast('Listing rejected', 'success'); }
+                else window.showToast('Failed to reject', 'error');
+            });
+        };
+
+        window.deleteListing = function(id, btn) {
+            if (!confirm('Delete this listing permanently?')) return;
+            window.adminFetch('DELETE', '/api/admin/listings/' + id).then(function(r) {
+                if (r.ok || r.status === 204) {
+                    var row = document.querySelector('tr[data-id="' + id + '"]');
+                    if (row) row.remove();
+                    window.showToast('Listing deleted', 'success');
+                } else window.showToast('Failed to delete', 'error');
+            });
+        };
+
+        if (applyBtn) {
+            applyBtn.addEventListener('click', function() {
+                currentStatus = statusFilter ? statusFilter.value : '';
+                loadListings(currentStatus);
+            });
+        }
+
+        loadListings('');
+    });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

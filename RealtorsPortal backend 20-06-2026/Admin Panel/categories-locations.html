@@ -1,0 +1,1609 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Categories & Locations - Admin Portal</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        navy: {
+                            900: '#060B19',
+                            800: '#0B132B',
+                            700: '#1C2541',
+                            600: '#3A506B',
+                        },
+                        gold: {
+                            400: '#F1C40F',
+                            500: '#D4AF37',
+                            600: '#AA8C2C',
+                        }
+                    },
+                    boxShadow: {
+                        'premium': '0 10px 30px -10px rgba(0, 0, 0, 0.5)',
+                        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.1)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        /* Base styles */
+        body {
+            @apply bg-navy-900 text-white transition-colors duration-300 overflow-x-hidden;
+        }
+
+        /* Subtle Glassmorphism Utilities */
+        .glass-card { @apply bg-navy-800/80 backdrop-blur-md border border-navy-700 shadow-glass; }
+        
+        /* Table Styles */
+        .glass-table th { @apply bg-navy-800/80 font-medium text-xs tracking-wider text-gray-400 uppercase py-3 px-6 text-left border-b border-navy-700 whitespace-nowrap; }
+        .glass-table td { @apply py-4 px-6 border-b border-navy-700/50 text-sm text-gray-300; }
+
+        @layer components {
+            .panel-card { @apply bg-navy-800/50 backdrop-blur-sm border border-navy-700 rounded-xl p-6; }
+            .form-input { @apply w-full bg-navy-900 border border-navy-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500 transition-colors placeholder-gray-500; }
+            .form-label { @apply block text-sm font-medium text-gray-300 mb-2; }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            @apply bg-transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            @apply bg-navy-700 rounded-full;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            @apply bg-gold-500;
+        }
+
+        .skeleton-loader > * {
+            @apply opacity-0 transition-opacity duration-300;
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-navy-900/80 backdrop-blur-sm z-40 hidden lg:hidden"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 glass-card transform -translate-x-full transition-transform duration-300 lg:translate-x-0 lg:static lg:flex-shrink-0 flex flex-col h-full border-r border-navy-700">
+        <!-- Logo Area -->
+        <div class="h-16 flex items-center justify-between px-6 border-b border-navy-700">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-gold-500 flex items-center justify-center text-navy-900 font-bold">L</div>
+                <span class="font-semibold text-lg tracking-wide">Admin Portal</span>
+            </div>
+            <button id="sidebar-close" class="lg:hidden text-gray-400 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <!-- Navigation -->
+        <div class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+            <p class="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Main Menu</p>
+            
+            <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Dashboard</span>
+            </a>
+            
+            <a href="listings.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="building-2" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Listings</span>
+            </a>
+            
+            <a href="users.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="users" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Users</span>
+            </a>
+
+            <a href="categories-locations.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-gold-500/10 text-gold-600 dark:text-gold-400 transition-colors group">
+                <i data-lucide="map" class="w-5 h-5"></i>
+                <span class="font-medium">Categories & Loc</span>
+            </a>
+
+            <a href="packages.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="package" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Packages</span>
+            </a>
+
+            <p class="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-6">System</p>
+
+            <a href="reports.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="bar-chart-3" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Reports</span>
+            </a>
+
+            <a href="settings.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="settings" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Site Settings</span>
+            </a>
+        </div>
+
+        <!-- User Mini Profile -->
+        <div class="p-4 border-t border-navy-700">
+            <a href="profile.html" class="flex items-center gap-3 p-2 rounded-lg hover:bg-navy-700 transition-colors">
+                <img src="images/admin_profile.png" alt="Admin" class="w-10 h-10 rounded-full border-2 border-gold-500">
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-white truncate">Super Admin</p>
+                    <p class="text-xs text-gray-400 truncate">admin@luxury.com</p>
+                </div>
+            </a>
+            <button onclick="adminLogout()"
+                class="mt-1 flex items-center gap-3 w-full px-3 py-2 rounded-lg text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors text-sm font-medium">
+                <i data-lucide="log-out" class="w-4 h-4 flex-shrink-0"></i>
+                <span>Logout</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col min-w-0 bg-navy-900">
+        <!-- Top Header -->
+        <header class="h-16 glass-card sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 lg:px-8 border-b border-navy-700">
+            <div class="flex items-center gap-4">
+                <button id="sidebar-toggle" class="lg:hidden text-gray-400 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-gold-500">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+                <h1 class="text-xl font-semibold hidden sm:block">Categories & Locations</h1>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div id="notification-bell-container" class="relative"></div>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+            
+            <!-- Header Actions -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Data Management</h2>
+                    <p class="text-sm text-gray-400 mt-1">Manage all categories and geographical locations for listings.</p>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                    <div class="relative w-full sm:w-64">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 flex items-center justify-center pointer-events-none">
+                            <i data-lucide="search" class="w-4 h-4"></i>
+                        </span>
+                        <input type="text" placeholder="Search categories..." class="form-input pl-10" data-table-search="categories-table">
+                    </div>
+                    <button data-modal-target="addModal" class="px-5 py-2.5 rounded-lg bg-gold-500 hover:bg-gold-600 text-navy-900 font-semibold transition-colors flex items-center gap-2 shadow-lg shadow-gold-500/20 whitespace-nowrap">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Add New Record
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="panel-card !p-0 overflow-hidden skeleton-loader animate-pulse bg-navy-700 text-transparent flex flex-col h-[calc(100vh-16rem)] min-h-[400px]">
+                
+                <div class="flex overflow-x-auto border-b border-navy-700">
+                    <button class="tab-btn px-6 py-4 text-sm font-medium whitespace-nowrap border-b-2 transition-colors border-gold-500 text-gold-500 dark:text-gold-400" data-target="tab-categories">
+                        Categories
+                    </button>
+                    <button class="tab-btn px-6 py-4 text-sm font-medium whitespace-nowrap border-b-2 border-transparent text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors" data-target="tab-countries">
+                        Countries
+                    </button>
+                    <button class="tab-btn px-6 py-4 text-sm font-medium whitespace-nowrap border-b-2 border-transparent text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors" data-target="tab-regions">
+                        Regions/States
+                    </button>
+                    <button class="tab-btn px-6 py-4 text-sm font-medium whitespace-nowrap border-b-2 border-transparent text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors" data-target="tab-cities">
+                        Cities
+                    </button>
+                    <button class="tab-btn px-6 py-4 text-sm font-medium whitespace-nowrap border-b-2 border-transparent text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors" data-target="tab-areas">
+                        Areas
+                    </button>
+                </div>
+
+                <!-- Tab Panes -->
+                <div class="flex-1 overflow-y-auto">
+                    <!-- Categories Tab -->
+                    <div id="tab-categories" class="tab-pane w-full">
+                        <table id="categories-table" data-page-size="10" class="w-full text-left border-collapse glass-table">
+                            <thead>
+                                <tr>
+                                    <th class="w-16 text-center" data-sort>ID</th>
+                                    <th>Name</th>
+                                    <th>Slug</th>
+                                    <th>Status</th>
+                                    <th class="text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Category 1 -->
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">1</td>
+                                    <td class="font-medium text-white">Luxury Villas</td>
+                                    <td class="font-mono text-gray-400 text-xs">luxury-villas</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- Category 2 -->
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">2</td>
+                                    <td class="font-medium text-white">Penthouses</td>
+                                    <td class="font-mono text-gray-400 text-xs">penthouses</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- Category 3 -->
+                                <tr data-status="inactive" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">3</td>
+                                    <td class="font-medium text-white">Commercial Spaces</td>
+                                    <td class="font-mono text-gray-400 text-xs">commercial-spaces</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-navy-900/10 dark:text-gray-400">
+                                            Inactive
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- Category 4 -->
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">4</td>
+                                    <td class="font-medium text-white">Beachfront Properties</td>
+                                    <td class="font-mono text-gray-400 text-xs">beachfront-properties</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- Category 5 -->
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">5</td>
+                                    <td class="font-medium text-white">Cozy Apartments</td>
+                                    <td class="font-mono text-gray-400 text-xs">cozy-apartments</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- Category 6 -->
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">6</td>
+                                    <td class="font-medium text-white">Countryside Manors</td>
+                                    <td class="font-mono text-gray-400 text-xs">countryside-manors</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- Category 7 -->
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">7</td>
+                                    <td class="font-medium text-white">Office Buildings</td>
+                                    <td class="font-mono text-gray-400 text-xs">office-buildings</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- Category 8 -->
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">8</td>
+                                    <td class="font-medium text-white">Retail Shops</td>
+                                    <td class="font-mono text-gray-400 text-xs">retail-shops</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- Category 9 -->
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">9</td>
+                                    <td class="font-medium text-white">Industrial Warehouses</td>
+                                    <td class="font-mono text-gray-400 text-xs">industrial-warehouses</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- Category 10 -->
+                                <tr data-status="inactive" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">10</td>
+                                    <td class="font-medium text-white">Empty Land / Plots</td>
+                                    <td class="font-mono text-gray-400 text-xs">empty-land-plots</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-navy-900/10 dark:text-gray-400">
+                                            Inactive
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- Category 11 -->
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">11</td>
+                                    <td class="font-medium text-white">Townhouses</td>
+                                    <td class="font-mono text-gray-400 text-xs">townhouses</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- Category 12 -->
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">12</td>
+                                    <td class="font-medium text-white">Duplex Houses</td>
+                                    <td class="font-mono text-gray-400 text-xs">duplex-houses</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- Category 13 -->
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">13</td>
+                                    <td class="font-medium text-white">Suburb Mansions</td>
+                                    <td class="font-mono text-gray-400 text-xs">suburb-mansions</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- Category 14 -->
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">14</td>
+                                    <td class="font-medium text-white">Studio Apartments</td>
+                                    <td class="font-mono text-gray-400 text-xs">studio-apartments</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- Category 15 -->
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">15</td>
+                                    <td class="font-medium text-white">Vacation Rentals</td>
+                                    <td class="font-mono text-gray-400 text-xs">vacation-rentals</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Pagination -->
+                        <div data-table-pagination="categories-table" class="px-6 py-4 border-t border-navy-700 flex items-center justify-between">
+                            <p class="text-sm text-gray-400">Showing <span class="font-medium text-white pagination-start">1</span> to <span class="font-medium text-white pagination-end">10</span> of <span class="font-medium text-white pagination-total">15</span> entries</p>
+                            <div class="flex gap-1 pagination-buttons">
+                                <!-- Dynamically populated by shared.js -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Countries Tab -->
+                    <div id="tab-countries" class="tab-pane hidden w-full">
+                        <table id="countries-table" data-page-size="10" class="w-full text-left border-collapse glass-table">
+                            <thead>
+                                <tr>
+                                    <th class="w-16 text-center" data-sort>ID</th>
+                                    <th>Name</th>
+                                    <th>Status</th>
+                                    <th class="text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">1</td>
+                                    <td class="font-medium text-white">United States</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">2</td>
+                                    <td class="font-medium text-white">Canada</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">3</td>
+                                    <td class="font-medium text-white">United Kingdom</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">4</td>
+                                    <td class="font-medium text-white">Australia</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">5</td>
+                                    <td class="font-medium text-white">Germany</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">6</td>
+                                    <td class="font-medium text-white">France</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">7</td>
+                                    <td class="font-medium text-white">Italy</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">8</td>
+                                    <td class="font-medium text-white">Spain</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">9</td>
+                                    <td class="font-medium text-white">Japan</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="inactive" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">10</td>
+                                    <td class="font-medium text-white">China</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-navy-900/10 dark:text-gray-400">
+                                            Inactive
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">11</td>
+                                    <td class="font-medium text-white">Brazil</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">12</td>
+                                    <td class="font-medium text-white">India</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Pagination -->
+                        <div data-table-pagination="countries-table" class="px-6 py-4 border-t border-navy-700 flex items-center justify-between">
+                            <p class="text-sm text-gray-400">Showing <span class="font-medium text-white pagination-start">1</span> to <span class="font-medium text-white pagination-end">10</span> of <span class="font-medium text-white pagination-total">12</span> entries</p>
+                            <div class="flex gap-1 pagination-buttons">
+                                <!-- Dynamically populated by shared.js -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Regions Tab -->
+                    <div id="tab-regions" class="tab-pane hidden w-full">
+                        <table id="regions-table" data-page-size="10" class="w-full text-left border-collapse glass-table">
+                            <thead>
+                                <tr>
+                                    <th class="w-16 text-center" data-sort>ID</th>
+                                    <th>Name</th>
+                                    <th>Status</th>
+                                    <th class="text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">1</td>
+                                    <td class="font-medium text-white">California</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">2</td>
+                                    <td class="font-medium text-white">Texas</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">3</td>
+                                    <td class="font-medium text-white">New York</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">4</td>
+                                    <td class="font-medium text-white">Florida</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">5</td>
+                                    <td class="font-medium text-white">Ontario</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">6</td>
+                                    <td class="font-medium text-white">Quebec</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">7</td>
+                                    <td class="font-medium text-white">British Columbia</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">8</td>
+                                    <td class="font-medium text-white">London</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">9</td>
+                                    <td class="font-medium text-white">Scotland</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">10</td>
+                                    <td class="font-medium text-white">Tokyo</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="inactive" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">11</td>
+                                    <td class="font-medium text-white">Osaka</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-navy-900/10 dark:text-gray-400">
+                                            Inactive
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">12</td>
+                                    <td class="font-medium text-white">Bavaria</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Pagination -->
+                        <div data-table-pagination="regions-table" class="px-6 py-4 border-t border-navy-700 flex items-center justify-between">
+                            <p class="text-sm text-gray-400">Showing <span class="font-medium text-white pagination-start">1</span> to <span class="font-medium text-white pagination-end">10</span> of <span class="font-medium text-white pagination-total">12</span> entries</p>
+                            <div class="flex gap-1 pagination-buttons">
+                                <!-- Dynamically populated by shared.js -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cities Tab -->
+                    <div id="tab-cities" class="tab-pane hidden w-full">
+                        <table id="cities-table" data-page-size="10" class="w-full text-left border-collapse glass-table">
+                            <thead>
+                                <tr>
+                                    <th class="w-16 text-center" data-sort>ID</th>
+                                    <th>Name</th>
+                                    <th>Status</th>
+                                    <th class="text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">1</td>
+                                    <td class="font-medium text-white">Los Angeles</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">2</td>
+                                    <td class="font-medium text-white">San Francisco</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">3</td>
+                                    <td class="font-medium text-white">Houston</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">4</td>
+                                    <td class="font-medium text-white">Dallas</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">5</td>
+                                    <td class="font-medium text-white">New York City</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">6</td>
+                                    <td class="font-medium text-white">Miami</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">7</td>
+                                    <td class="font-medium text-white">Orlando</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">8</td>
+                                    <td class="font-medium text-white">Toronto</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">9</td>
+                                    <td class="font-medium text-white">Montreal</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">10</td>
+                                    <td class="font-medium text-white">Vancouver</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="inactive" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">11</td>
+                                    <td class="font-medium text-white">London City</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-navy-900/10 dark:text-gray-400">
+                                            Inactive
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">12</td>
+                                    <td class="font-medium text-white">Edinburgh</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Pagination -->
+                        <div data-table-pagination="cities-table" class="px-6 py-4 border-t border-navy-700 flex items-center justify-between">
+                            <p class="text-sm text-gray-400">Showing <span class="font-medium text-white pagination-start">1</span> to <span class="font-medium text-white pagination-end">10</span> of <span class="font-medium text-white pagination-total">12</span> entries</p>
+                            <div class="flex gap-1 pagination-buttons">
+                                <!-- Dynamically populated by shared.js -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Areas Tab -->
+                    <div id="tab-areas" class="tab-pane hidden w-full">
+                        <table id="areas-table" data-page-size="10" class="w-full text-left border-collapse glass-table">
+                            <thead>
+                                <tr>
+                                    <th class="w-16 text-center" data-sort>ID</th>
+                                    <th>Name</th>
+                                    <th>Status</th>
+                                    <th class="text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">1</td>
+                                    <td class="font-medium text-white">Beverly Hills</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">2</td>
+                                    <td class="font-medium text-white">Hollywood</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">3</td>
+                                    <td class="font-medium text-white">Downtown LA</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">4</td>
+                                    <td class="font-medium text-white">Manhattan</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">5</td>
+                                    <td class="font-medium text-white">Brooklyn</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">6</td>
+                                    <td class="font-medium text-white">Queens</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">7</td>
+                                    <td class="font-medium text-white">South Beach</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">8</td>
+                                    <td class="font-medium text-white">Brickell</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">9</td>
+                                    <td class="font-medium text-white">Westminster</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="inactive" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">10</td>
+                                    <td class="font-medium text-white">Chelsea</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-navy-900/10 dark:text-gray-400">
+                                            Inactive
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">11</td>
+                                    <td class="font-medium text-white">Kensington</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr data-status="active" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                    <td class="text-center font-mono text-gray-400">12</td>
+                                    <td class="font-medium text-white">Shinjuku</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Pagination -->
+                        <div data-table-pagination="areas-table" class="px-6 py-4 border-t border-navy-700 flex items-center justify-between">
+                            <p class="text-sm text-gray-400">Showing <span class="font-medium text-white pagination-start">1</span> to <span class="font-medium text-white pagination-end">10</span> of <span class="font-medium text-white pagination-total">12</span> entries</p>
+                            <div class="flex gap-1 pagination-buttons">
+                                <!-- Dynamically populated by shared.js -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Modal Container -->
+    <div id="addModal" class="modal-container fixed inset-0 z-50 hidden items-center justify-center">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-navy-900/60 backdrop-blur-sm" data-modal-close></div>
+        
+        <!-- Modal Content -->
+        <form id="recordForm" novalidate class="relative w-full max-w-md glass-card rounded-2xl shadow-2xl m-4 transform transition-all">
+            <div class="flex items-center justify-between p-6 border-b border-navy-700">
+                <h3 id="modal-title" class="text-lg font-semibold text-white">Add New Record</h3>
+                <button type="button" data-modal-close class="text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="form-label">Type</label>
+                    <select id="record-type" class="form-input">
+                        <option value="">Select Type</option>
+                        <option value="Category">Category</option>
+                        <option value="Country">Country</option>
+                        <option value="Region">Region</option>
+                        <option value="City">City</option>
+                        <option value="Area">Area</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Name</label>
+                    <input type="text" id="record-name" placeholder="e.g. Luxury Villas" class="form-input">
+                </div>
+                <div>
+                    <label class="flex items-center gap-3 cursor-pointer group mt-6">
+                        <div class="relative">
+                            <input type="checkbox" id="record-status" class="sr-only" checked>
+                            <div class="block w-12 h-6 bg-gold-500 rounded-full transition-colors"></div>
+                            <div class="dot absolute left-1 top-1 bg-navy-900 w-4 h-4 rounded-full transition-transform transform translate-x-6"></div>
+                        </div>
+                        <span class="text-sm font-medium text-gray-300">Set as Active</span>
+                    </label>
+                </div>
+            </div>
+            <div class="flex items-center justify-end gap-3 p-6 border-t border-navy-700 bg-navy-900/50 dark:bg-navy-800/30 rounded-b-2xl">
+                <button type="button" data-modal-close class="px-4 py-2 text-sm font-medium text-gray-300 hover:bg-navy-700 rounded-lg transition-colors">
+                    Cancel
+                </button>
+                <button type="submit" id="save-record-btn" class="px-4 py-2 text-sm font-medium bg-gold-500 hover:bg-gold-600 text-navy-900 rounded-lg transition-colors shadow-lg shadow-gold-500/20">
+                    Save Record
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteConfirmModal" class="modal-container fixed inset-0 z-50 hidden items-center justify-center">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-navy-900/60 backdrop-blur-sm" data-modal-close></div>
+        
+        <!-- Modal Content -->
+        <div class="relative w-full max-w-sm glass-card rounded-2xl shadow-2xl m-4 transform transition-all p-6 text-center">
+            <div class="w-16 h-16 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-white mb-2">Delete Record</h3>
+            <p class="text-sm text-gray-400 mb-6">Are you sure you want to delete this record? This action cannot be undone.</p>
+            <div class="flex items-center justify-center gap-3">
+                <button data-modal-close class="px-4 py-2 text-sm font-medium text-gray-300 hover:bg-navy-700 rounded-lg transition-colors">
+                    Cancel
+                </button>
+                <button id="confirm-delete-btn" class="px-4 py-2 text-sm font-medium bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors shadow-lg shadow-red-500/20">
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shared JS -->
+    <script src="js/shared.js"></script>
+    
+    <!-- Page Specific Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const recordForm = document.getElementById('recordForm');
+            const recordTypeSelect = document.getElementById('record-type');
+            const recordNameInput = document.getElementById('record-name');
+            const recordStatusCheckbox = document.getElementById('record-status');
+            const modalTitle = document.getElementById('modal-title');
+            const saveRecordBtn = document.getElementById('save-record-btn');
+            
+            // Toggle visual state sync helper
+            function syncToggleState(checkbox) {
+                if (!checkbox) return;
+                const toggleBg = checkbox.nextElementSibling;
+                if (!toggleBg) return;
+                const toggleDot = toggleBg.nextElementSibling;
+                if (!toggleDot) return;
+                
+                if (checkbox.checked) {
+                    toggleBg.classList.remove('bg-navy-700');
+                    toggleBg.classList.add('bg-gold-500');
+                    toggleDot.classList.remove('translate-x-0');
+                    toggleDot.classList.add('translate-x-6');
+                } else {
+                    toggleBg.classList.remove('bg-gold-500');
+                    toggleBg.classList.add('bg-navy-700');
+                    toggleDot.classList.remove('translate-x-6');
+                    toggleDot.classList.add('translate-x-0');
+                }
+            }
+
+            if (recordStatusCheckbox) {
+                recordStatusCheckbox.addEventListener('change', () => syncToggleState(recordStatusCheckbox));
+            }
+
+            // Sync search inputs across tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const targetPaneId = btn.getAttribute('data-target');
+                    let tableId = 'categories-table';
+                    let placeholder = 'Search categories...';
+                    
+                    if (targetPaneId === 'tab-countries') {
+                        tableId = 'countries-table';
+                        placeholder = 'Search countries...';
+                    } else if (targetPaneId === 'tab-regions') {
+                        tableId = 'regions-table';
+                        placeholder = 'Search regions...';
+                    } else if (targetPaneId === 'tab-cities') {
+                        tableId = 'cities-table';
+                        placeholder = 'Search cities...';
+                    } else if (targetPaneId === 'tab-areas') {
+                        tableId = 'areas-table';
+                        placeholder = 'Search areas...';
+                    }
+                    
+                    const searchInput = document.querySelector('input[data-table-search]');
+                    if (searchInput) {
+                        searchInput.setAttribute('data-table-search', tableId);
+                        searchInput.setAttribute('placeholder', placeholder);
+                        searchInput.value = '';
+                        // trigger filter to refresh list
+                        if (typeof filterTable === 'function') {
+                            filterTable(tableId);
+                        }
+                    }
+                });
+            });
+
+            // "Add New Record" click setup
+            const addBtn = document.querySelector('[data-modal-target="addModal"]');
+            if (addBtn) {
+                addBtn.addEventListener('click', () => {
+                    if (recordForm) {
+                        recordForm.reset();
+                        // Clear error messages
+                        recordForm.querySelectorAll('.error-msg').forEach(el => el.remove());
+                        recordForm.querySelectorAll('.border-red-500').forEach(el => el.classList.remove('border-red-500'));
+                    }
+                    
+                    if (recordTypeSelect) {
+                        recordTypeSelect.disabled = false;
+                        recordTypeSelect.value = "";
+                    }
+                    
+                    if (recordStatusCheckbox) {
+                        recordStatusCheckbox.checked = true;
+                        syncToggleState(recordStatusCheckbox);
+                    }
+                    
+                    if (modalTitle) modalTitle.innerText = "Add New Record";
+                    if (saveRecordBtn) saveRecordBtn.innerText = "Save Record";
+                    
+                    window.editingRow = null;
+                });
+            }
+
+            // "Edit Record" click event delegation
+            document.addEventListener('click', (e) => {
+                const editBtn = e.target.closest('[data-action="edit"]');
+                if (editBtn) {
+                    e.preventDefault();
+                    const row = editBtn.closest('tr');
+                    if (!row) return;
+                    const table = row.closest('table');
+                    if (!table) return;
+                    const tableId = table.id;
+                    
+                    let type = "Category";
+                    if (tableId === 'countries-table') type = "Country";
+                    else if (tableId === 'regions-table') type = "Region";
+                    else if (tableId === 'cities-table') type = "City";
+                    else if (tableId === 'areas-table') type = "Area";
+                    
+                    // Clear errors first
+                    if (recordForm) {
+                        recordForm.querySelectorAll('.error-msg').forEach(el => el.remove());
+                        recordForm.querySelectorAll('.border-red-500').forEach(el => el.classList.remove('border-red-500'));
+                    }
+
+                    const name = row.cells[1].innerText.trim();
+                    const status = row.getAttribute('data-status') || 'active';
+                    
+                    if (recordTypeSelect) {
+                        recordTypeSelect.value = type;
+                        recordTypeSelect.disabled = true;
+                    }
+                    
+                    if (recordNameInput) {
+                        recordNameInput.value = name;
+                    }
+                    
+                    if (recordStatusCheckbox) {
+                        recordStatusCheckbox.checked = (status === 'active');
+                        syncToggleState(recordStatusCheckbox);
+                    }
+                    
+                    if (modalTitle) modalTitle.innerText = "Edit Record";
+                    if (saveRecordBtn) saveRecordBtn.innerText = "Update Record";
+                    
+                    window.editingRow = row;
+                    
+                    // Open Modal
+                    const addModal = document.getElementById('addModal');
+                    if (addModal) {
+                        addModal.classList.remove('hidden');
+                        addModal.classList.add('flex');
+                        document.body.style.overflow = 'hidden';
+                    }
+                }
+            });
+
+            // Form Submit handler
+            if (recordForm) {
+                recordForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    let isValid = true;
+                    recordForm.querySelectorAll('.error-msg').forEach(el => el.remove());
+                    recordForm.querySelectorAll('.border-red-500').forEach(el => el.classList.remove('border-red-500'));
+
+                    // Validation check
+                    const typeVal = recordTypeSelect.value;
+                    const nameVal = recordNameInput.value.trim();
+
+                    if (!typeVal) {
+                        isValid = false;
+                        showError(recordTypeSelect, 'Please select type');
+                    }
+                    if (!nameVal) {
+                        isValid = false;
+                        showError(recordNameInput, 'Name is required');
+                    }
+
+                    if (!isValid) return;
+
+                    // Disable button and show spinner
+                    const originalHtml = saveRecordBtn.innerHTML;
+                    saveRecordBtn.disabled = true;
+                    saveRecordBtn.classList.add('opacity-75', 'cursor-not-allowed');
+                    saveRecordBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin inline-block mr-1"></i> Saving...';
+                    if (window.lucide) lucide.createIcons();
+
+                    // Simulate delay (1-2 seconds)
+                    setTimeout(() => {
+                        const statusActive = recordStatusCheckbox.checked;
+                        const statusVal = statusActive ? 'active' : 'inactive';
+                        const statusBadgeClass = statusActive
+                            ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400'
+                            : 'bg-gray-100 text-gray-800 dark:bg-navy-900/10 dark:text-gray-400';
+                        const statusText = statusActive ? 'Active' : 'Inactive';
+
+                        if (window.editingRow) {
+                            // EDIT MODE
+                            const row = window.editingRow;
+                            row.setAttribute('data-status', statusVal);
+                            row.cells[1].innerText = nameVal;
+                            
+                            const tableId = row.closest('table').id;
+                            
+                            if (tableId === 'categories-table') {
+                                // update slug
+                                const slug = nameVal.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+                                row.cells[2].innerText = slug;
+                                // update badge
+                                row.cells[3].innerHTML = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusBadgeClass}">${statusText}</span>`;
+                            } else {
+                                // update badge
+                                row.cells[2].innerHTML = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusBadgeClass}">${statusText}</span>`;
+                            }
+
+                            if (typeof updateTablePagination === 'function') {
+                                updateTablePagination(tableId);
+                            }
+
+                            if (window.showToast) {
+                                window.showToast("Record updated successfully", "success");
+                            }
+                        } else {
+                            // CREATE MODE
+                            let tableId = 'categories-table';
+                            if (typeVal === 'Country') tableId = 'countries-table';
+                            else if (typeVal === 'Region') tableId = 'regions-table';
+                            else if (typeVal === 'City') tableId = 'cities-table';
+                            else if (typeVal === 'Area') tableId = 'areas-table';
+
+                            const targetTable = document.getElementById(tableId);
+                            if (targetTable) {
+                                const tbody = targetTable.querySelector('tbody');
+                                // Determine next ID
+                                const rows = tbody.querySelectorAll('tr');
+                                let maxId = 0;
+                                rows.forEach(r => {
+                                    const idVal = parseInt(r.cells[0].innerText.trim()) || 0;
+                                    if (idVal > maxId) maxId = idVal;
+                                });
+                                const nextId = maxId + 1;
+
+                                const newRow = document.createElement('tr');
+                                newRow.className = 'hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors';
+                                newRow.setAttribute('data-status', statusVal);
+                                newRow.dataset.searchMatch = 'true';
+
+                                if (tableId === 'categories-table') {
+                                    const slug = nameVal.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+                                    newRow.innerHTML = `
+                                        <td class="text-center font-mono text-gray-400">${nextId}</td>
+                                        <td class="font-medium text-white">${nameVal}</td>
+                                        <td class="font-mono text-gray-400 text-xs">${slug}</td>
+                                        <td>
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusBadgeClass}">${statusText}</span>
+                                        </td>
+                                        <td class="text-right">
+                                            <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                            <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                        </td>
+                                    `;
+                                } else {
+                                    newRow.innerHTML = `
+                                        <td class="text-center font-mono text-gray-400">${nextId}</td>
+                                        <td class="font-medium text-white">${nameVal}</td>
+                                        <td>
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusBadgeClass}">${statusText}</span>
+                                        </td>
+                                        <td class="text-right">
+                                            <button data-action="edit" class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                            <button data-action="delete" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                        </td>
+                                    `;
+                                }
+
+                                tbody.appendChild(newRow);
+
+                                // Go to page 1 for addition
+                                if (window.paginationState && window.paginationState[tableId]) {
+                                    window.paginationState[tableId].currentPage = 1;
+                                }
+
+                                if (typeof updateTablePagination === 'function') {
+                                    updateTablePagination(tableId);
+                                }
+
+                                 // Switch to correct Tab
+                                 const tabMapping = {
+                                     'category': 'categories',
+                                     'country': 'countries',
+                                     'region': 'regions',
+                                     'city': 'cities',
+                                     'area': 'areas'
+                                 };
+                                 const tabSuffix = tabMapping[typeVal.toLowerCase()] || (typeVal.toLowerCase() + 's');
+                                 const tabBtnSelector = `[data-target="tab-${tabSuffix}"]`;
+                                 const tabBtn = document.querySelector(tabBtnSelector);
+                                 if (tabBtn) tabBtn.click();
+
+                                if (window.showToast) {
+                                    window.showToast("Record added successfully", "success");
+                                }
+                            }
+                        }
+
+                        // Close Modal
+                        const addModal = document.getElementById('addModal');
+                        if (addModal) {
+                            addModal.classList.add('hidden');
+                            addModal.classList.remove('flex');
+                            document.body.style.overflow = '';
+                        }
+
+                        // Re-enable and reset form
+                        saveRecordBtn.disabled = false;
+                        saveRecordBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                        saveRecordBtn.innerHTML = originalHtml;
+                        if (window.lucide) lucide.createIcons();
+
+                        recordForm.reset();
+                        window.editingRow = null;
+                    }, 1200);
+                });
+            }
+
+            function showError(input, msg) {
+                input.classList.add('border-red-500');
+                const err = document.createElement('p');
+                err.className = 'error-msg text-red-500 text-xs mt-1';
+                err.innerText = msg;
+                input.parentElement.appendChild(err);
+            }
+        });
+    </script>
+</body>
+</html>

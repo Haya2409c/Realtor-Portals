@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Luxury Realtors Portal</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        navy: {
+                            900: '#060B19', // Very dark background
+                            800: '#0B132B', // Sidebar/Card background
+                            700: '#1C2541', // Hover states
+                            600: '#3A506B', // Borders/dividers
+                        },
+                        gold: {
+                            400: '#F1C40F', // Bright accent
+                            500: '#D4AF37', // Luxury gold
+                            600: '#AA8C2C', // Darker gold for hover
+                        }
+                    },
+                    boxShadow: {
+                        'premium': '0 10px 30px -10px rgba(0, 0, 0, 0.5)',
+                        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.1)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        /* Base styles */
+        body {
+            @apply bg-navy-900 text-white transition-colors duration-300 overflow-x-hidden;
+        }
+
+        /* Subtle Glassmorphism Utilities */
+        .glass-card { @apply bg-navy-800/80 backdrop-blur-md border border-navy-700 shadow-glass; }
+        
+        /* Table Styles */
+        .glass-table th { @apply bg-navy-800/80 font-medium text-xs tracking-wider text-gray-400 uppercase py-3 px-6 text-left border-b border-navy-700 whitespace-nowrap; }
+        .glass-table td { @apply py-4 px-6 border-b border-navy-700/50 text-sm text-gray-300; }
+
+        @layer components {
+            .panel-card { @apply bg-navy-800/50 backdrop-blur-sm border border-navy-700 rounded-xl p-6; }
+            .form-input { @apply w-full bg-navy-900 border border-navy-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500 transition-colors placeholder-gray-500; }
+            .form-label { @apply block text-sm font-medium text-gray-300 mb-2; }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            @apply bg-transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            @apply bg-navy-700 rounded-full;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            @apply bg-gold-500;
+        }
+
+        .skeleton-loader > * {
+            @apply opacity-0 transition-opacity duration-300;
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-navy-900/80 backdrop-blur-sm z-40 hidden lg:hidden"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 glass-card transform -translate-x-full transition-transform duration-300 lg:translate-x-0 lg:static lg:flex-shrink-0 flex flex-col h-full border-r border-navy-700">
+        <!-- Logo Area -->
+        <div class="h-16 flex items-center justify-between px-6 border-b border-navy-700">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-gold-500 flex items-center justify-center text-navy-900 font-bold">L</div>
+                <span class="font-semibold text-lg tracking-wide">Admin Portal</span>
+            </div>
+            <button id="sidebar-close" class="lg:hidden text-gray-400 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <!-- Navigation -->
+        <div class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+            <p class="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Main Menu</p>
+            
+            <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-gold-500/10 text-gold-600 dark:text-gold-400 transition-colors group">
+                <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                <span class="font-medium">Dashboard</span>
+            </a>
+            
+            <a href="listings.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="building-2" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Listings</span>
+            </a>
+            
+            <a href="users.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="users" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Users</span>
+            </a>
+
+            <a href="categories-locations.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="map" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Categories & Loc</span>
+            </a>
+
+            <a href="packages.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="package" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Packages</span>
+            </a>
+
+            <p class="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-6">System</p>
+
+            <a href="reports.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="bar-chart-3" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Reports</span>
+            </a>
+
+            <a href="settings.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="settings" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Site Settings</span>
+            </a>
+        </div>
+
+        <!-- User Mini Profile -->
+        <div class="p-4 border-t border-navy-700">
+            <a href="profile.html" class="flex items-center gap-3 p-2 rounded-lg hover:bg-navy-700 transition-colors">
+                <img src="images/admin_profile.png" alt="Admin" class="w-10 h-10 rounded-full border-2 border-gold-500">
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-white truncate">Super Admin</p>
+                    <p class="text-xs text-gray-400 truncate">admin@luxury.com</p>
+                </div>
+            </a>
+            <button onclick="adminLogout()"
+                class="mt-1 flex items-center gap-3 w-full px-3 py-2 rounded-lg text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors text-sm font-medium">
+                <i data-lucide="log-out" class="w-4 h-4 flex-shrink-0"></i>
+                <span>Logout</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col min-w-0 bg-navy-900">
+        <!-- Top Header -->
+        <header class="h-16 glass-card sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 lg:px-8 border-b border-navy-700">
+            <div class="flex items-center gap-4">
+                <button id="sidebar-toggle" class="lg:hidden text-gray-400 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-gold-500">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+                <h1 class="text-xl font-semibold hidden sm:block">Dashboard Overview</h1>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div id="notification-bell-container" class="relative"></div>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+            
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Stat Card 1 -->
+                <div class="panel-card skeleton-loader animate-pulse bg-navy-700 text-transparent">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm font-medium text-gray-400 mb-1">Total Listings</p>
+                            <h3 id="stat-total-listings" class="text-3xl font-bold font-mono text-white">—</h3>
+                        </div>
+                        <div class="p-3 rounded-xl bg-gold-500/10 text-gold-500">
+                            <i data-lucide="building" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex items-center text-sm">
+                        <span class="text-emerald-500 flex items-center font-medium">
+                            <i data-lucide="arrow-up-right" class="w-4 h-4 mr-1"></i>
+                            12.5%
+                        </span>
+                        <span class="text-gray-400 ml-2">from last month</span>
+                    </div>
+                </div>
+
+                <!-- Stat Card 2 -->
+                <div class="panel-card skeleton-loader animate-pulse bg-navy-700 text-transparent">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm font-medium text-gray-400 mb-1">Active Sellers</p>
+                            <h3 id="stat-total-sellers" class="text-3xl font-bold font-mono text-white">—</h3>
+                        </div>
+                        <div class="p-3 rounded-xl bg-blue-500/10 text-blue-500">
+                            <i data-lucide="users" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex items-center text-sm">
+                        <span class="text-emerald-500 flex items-center font-medium">
+                            <i data-lucide="arrow-up-right" class="w-4 h-4 mr-1"></i>
+                            5.2%
+                        </span>
+                        <span class="text-gray-400 ml-2">from last month</span>
+                    </div>
+                </div>
+
+                <!-- Stat Card 3 -->
+                <div class="panel-card skeleton-loader animate-pulse bg-navy-700 text-transparent">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm font-medium text-gray-400 mb-1">Total Agents</p>
+                            <h3 id="stat-total-agents" class="text-3xl font-bold font-mono text-white">—</h3>
+                        </div>
+                        <div class="p-3 rounded-xl bg-purple-500/10 text-purple-500">
+                            <i data-lucide="user-check" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex items-center text-sm">
+                        <span class="text-emerald-500 flex items-center font-medium">
+                            <i data-lucide="arrow-up-right" class="w-4 h-4 mr-1"></i>
+                            2.1%
+                        </span>
+                        <span class="text-gray-400 ml-2">from last month</span>
+                    </div>
+                </div>
+
+                <!-- Stat Card 4 -->
+                <div class="panel-card skeleton-loader animate-pulse bg-navy-700 text-transparent">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm font-medium text-gray-400 mb-1">Pending Approvals</p>
+                            <h3 id="stat-pending-listings" class="text-3xl font-bold font-mono text-white">—</h3>
+                        </div>
+                        <div class="p-3 rounded-xl bg-red-500/10 text-red-500">
+                            <i data-lucide="clock" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex items-center text-sm">
+                        <span class="text-red-500 flex items-center font-medium">
+                            <i data-lucide="arrow-down-right" class="w-4 h-4 mr-1"></i>
+                            1.4%
+                        </span>
+                        <span class="text-gray-400 ml-2">from last month</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts & Tables Row -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Main Chart -->
+                <div class="lg:col-span-2 panel-card skeleton-loader animate-pulse bg-navy-700 text-transparent">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-lg font-semibold text-white">Revenue Overview</h2>
+                        <select class="bg-gray-100 dark:bg-navy-900 border-none text-sm rounded-lg focus:ring-gold-500 dark:text-white">
+                            <option>This Year</option>
+                            <option>Last Year</option>
+                        </select>
+                    </div>
+                    <div class="relative h-72 w-full">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Recent Activity List -->
+                <div class="panel-card skeleton-loader animate-pulse bg-navy-700 text-transparent">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-lg font-semibold text-white">Recent Activity</h2>
+                        <button class="text-sm text-gold-500 hover:text-gold-600 font-medium">View All</button>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <!-- Activity Item -->
+                        <div class="flex gap-4">
+                            <div class="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-emerald-500"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-white">Listing Approved</p>
+                                <p class="text-xs text-gray-400 mt-1">"Luxury Villa in Beverly Hills" was approved by Admin.</p>
+                                <p class="text-xs text-gray-400 dark:text-gray-400 mt-1 font-mono">10 mins ago</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Activity Item -->
+                        <div class="flex gap-4">
+                            <div class="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="user-plus" class="w-5 h-5 text-blue-500"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-white">New Agent Registered</p>
+                                <p class="text-xs text-gray-400 mt-1">Michael Scott registered as an Agent.</p>
+                                <p class="text-xs text-gray-400 dark:text-gray-400 mt-1 font-mono">2 hours ago</p>
+                            </div>
+                        </div>
+
+                        <!-- Activity Item -->
+                        <div class="flex gap-4">
+                            <div class="w-10 h-10 rounded-full bg-gold-500/10 flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="credit-card" class="w-5 h-5 text-gold-500"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-white">Premium Package Sold</p>
+                                <p class="text-xs text-gray-400 mt-1">Sarah Jenkins purchased the Gold Package.</p>
+                                <p class="text-xs text-gray-400 dark:text-gray-400 mt-1 font-mono">5 hours ago</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Activity Item -->
+                        <div class="flex gap-4">
+                            <div class="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="alert-circle" class="w-5 h-5 text-red-500"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-white">Listing Reported</p>
+                                <p class="text-xs text-gray-400 mt-1">"Downtown Apartment" was reported for fake images.</p>
+                                <p class="text-xs text-gray-400 dark:text-gray-400 mt-1 font-mono">1 day ago</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Shared JS -->
+    <script src="js/shared.js"></script>
+
+    <!-- Auth Guard + Logout -->
+    <script>
+        (function() {
+            if (!localStorage.getItem('adminToken')) {
+                window.location.replace('/admin/login.html');
+            }
+            var u = JSON.parse(localStorage.getItem('adminUser') || '{}');
+            var nameEl = document.querySelector('[data-admin-name]');
+            var emailEl = document.querySelector('[data-admin-email]');
+            if (nameEl && u.fullName) nameEl.textContent = u.fullName;
+            if (emailEl && u.email) emailEl.textContent = u.email;
+        })();
+
+        function adminLogout() {
+            var token = localStorage.getItem('adminToken');
+            fetch('/api/auth/admin/logout', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + (token || ''), 'Content-Type': 'application/json' }
+            }).finally(function() {
+                ['adminToken','adminRefreshToken','adminUserId','adminUser'].forEach(function(k){ localStorage.removeItem(k); });
+                window.location.replace('/admin/login.html');
+            });
+        }
+    </script>
+
+    <!-- Dashboard API Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const isDark = document.documentElement.classList.contains('dark');
+            const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+            const textColor = isDark ? '#9CA3AF' : '#6B7280';
+
+            const chartConfig = {
+                type: 'line',
+                data: {
+                    labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+                    datasets: [{
+                        label: 'Revenue ($)',
+                        data: [0,0,0,0,0,0,0,0,0,0,0,0],
+                        borderColor: '#D4AF37',
+                        backgroundColor: 'rgba(212,175,55,0.1)',
+                        borderWidth: 2, tension: 0.4, fill: true,
+                        pointBackgroundColor: '#060B19', pointBorderColor: '#D4AF37',
+                        pointBorderWidth: 2, pointRadius: 4, pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: isDark ? '#1C2541' : '#FFFFFF',
+                            titleColor: isDark ? '#FFFFFF' : '#111827',
+                            bodyColor: isDark ? '#D1D5DB' : '#4B5563',
+                            borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                            borderWidth: 1, padding: 12, displayColors: false,
+                            callbacks: { label: ctx => new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(ctx.parsed.y) }
+                        }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: gridColor, drawBorder: false },
+                            ticks: { color: textColor, font: { family: "'JetBrains Mono',monospace" },
+                                callback: v => v >= 1000 ? '$' + v/1000 + 'k' : '$' + v } },
+                        x: { grid: { display: false, drawBorder: false },
+                            ticks: { color: textColor, font: { family: "'Inter',sans-serif" } } }
+                    }
+                }
+            };
+
+            const ctx = document.getElementById('revenueChart');
+            let revenueChart = ctx ? new Chart(ctx.getContext('2d'), chartConfig) : null;
+
+            // Load summary stats
+            window.adminFetch('GET', '/api/admin/reports/summary').then(r => r.json()).then(d => {
+                var set = (id, v) => { var el = document.getElementById(id); if (el) el.textContent = v.toLocaleString('en-US'); };
+                set('stat-total-listings', d.totalListings || 0);
+                set('stat-total-sellers', d.totalSellers || 0);
+                set('stat-total-agents', d.totalAgents || 0);
+                set('stat-pending-listings', d.pendingListings || 0);
+            }).catch(() => {});
+
+            // Load revenue chart
+            window.adminFetch('GET', '/api/admin/reports/revenue-monthly').then(r => r.json()).then(d => {
+                if (revenueChart && d.monthly) {
+                    revenueChart.data.datasets[0].data = d.monthly;
+                    revenueChart.update();
+                }
+            }).catch(() => {});
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

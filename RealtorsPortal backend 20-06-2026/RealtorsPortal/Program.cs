@@ -127,7 +127,7 @@ app.UseStaticFiles();
 
 // ── Serve Admin Panel static files at /admin/* ───────────
 var adminPanelPath = Path.GetFullPath(
-    Path.Combine(app.Environment.ContentRootPath, "..", "..", "Admin Panel"));
+    Path.Combine(app.Environment.ContentRootPath, "..", "Admin Panel"));
 
 if (Directory.Exists(adminPanelPath))
 {
@@ -170,11 +170,12 @@ static async Task SeedDataAsync(IServiceProvider services)
     const string adminEmail    = "admin@realtorsportal.com";
     const string adminPassword = "Admin@123";
 
-    if (await userManager.FindByEmailAsync(adminEmail) is null)
+    var existingAdmin = await userManager.FindByEmailAsync(adminEmail);
+    if (existingAdmin is null)
     {
         var admin = new RealtorsPortal.Models.Entities.ApplicationUser
         {
-            UserName    = "admin",
+            UserName    = adminEmail,
             Email       = adminEmail,
             FullName    = "Super Admin",
             AccountType = "Admin",
@@ -185,6 +186,21 @@ static async Task SeedDataAsync(IServiceProvider services)
         var result = await userManager.CreateAsync(admin, adminPassword);
         if (result.Succeeded)
             await userManager.AddToRoleAsync(admin, "Admin");
+    }
+    else
+    {
+        // Fix existing admin: ensure UserName = email, reset password, clear lockout
+        existingAdmin.UserName = adminEmail;
+        existingAdmin.EmailConfirmed = true;
+        await userManager.UpdateAsync(existingAdmin);
+
+        var resetToken = await userManager.GeneratePasswordResetTokenAsync(existingAdmin);
+        await userManager.ResetPasswordAsync(existingAdmin, resetToken, adminPassword);
+        await userManager.SetLockoutEndDateAsync(existingAdmin, null);
+        await userManager.ResetAccessFailedCountAsync(existingAdmin);
+
+        if (!await userManager.IsInRoleAsync(existingAdmin, "Admin"))
+            await userManager.AddToRoleAsync(existingAdmin, "Admin");
     }
 
     // ── Default categories ───────────────────────────────────

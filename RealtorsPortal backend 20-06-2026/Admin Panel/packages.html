@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Packages Management - Admin Portal</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        navy: {
+                            900: '#060B19',
+                            800: '#0B132B',
+                            700: '#1C2541',
+                            600: '#3A506B',
+                        },
+                        gold: {
+                            400: '#F1C40F',
+                            500: '#D4AF37',
+                            600: '#AA8C2C',
+                        }
+                    },
+                    boxShadow: {
+                        'premium': '0 10px 30px -10px rgba(0, 0, 0, 0.5)',
+                        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.1)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        /* Base styles */
+        body {
+            @apply bg-navy-900 text-white transition-colors duration-300 overflow-x-hidden;
+        }
+
+        /* Subtle Glassmorphism Utilities */
+        .glass-card { @apply bg-navy-800/80 backdrop-blur-md border border-navy-700 shadow-glass; }
+        
+        /* Table Styles */
+        .glass-table th { @apply bg-navy-800/80 font-medium text-xs tracking-wider text-gray-400 uppercase py-3 px-6 text-left border-b border-navy-700 whitespace-nowrap; }
+        .glass-table td { @apply py-4 px-6 border-b border-navy-700/50 text-sm text-gray-300; }
+
+        @layer components {
+            .panel-card { @apply bg-navy-800/50 backdrop-blur-sm border border-navy-700 rounded-xl p-6; }
+            .form-input { @apply w-full bg-navy-900 border border-navy-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500 transition-colors placeholder-gray-500; }
+            .form-label { @apply block text-sm font-medium text-gray-300 mb-2; }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            @apply bg-transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            @apply bg-navy-700 rounded-full;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            @apply bg-gold-500;
+        }
+
+        .skeleton-loader > * {
+            @apply opacity-0 transition-opacity duration-300;
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-navy-900/80 backdrop-blur-sm z-40 hidden lg:hidden"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 glass-card transform -translate-x-full transition-transform duration-300 lg:translate-x-0 lg:static lg:flex-shrink-0 flex flex-col h-full border-r border-navy-700">
+        <!-- Logo Area -->
+        <div class="h-16 flex items-center justify-between px-6 border-b border-navy-700">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-gold-500 flex items-center justify-center text-navy-900 font-bold">L</div>
+                <span class="font-semibold text-lg tracking-wide">Admin Portal</span>
+            </div>
+            <button id="sidebar-close" class="lg:hidden text-gray-400 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <!-- Navigation -->
+        <div class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+            <p class="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Main Menu</p>
+            
+            <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Dashboard</span>
+            </a>
+            
+            <a href="listings.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="building-2" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Listings</span>
+            </a>
+            
+            <a href="users.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="users" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Users</span>
+            </a>
+
+            <a href="categories-locations.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="map" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Categories & Loc</span>
+            </a>
+
+            <a href="packages.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-gold-500/10 text-gold-600 dark:text-gold-400 transition-colors group">
+                <i data-lucide="package" class="w-5 h-5"></i>
+                <span class="font-medium">Packages</span>
+            </a>
+
+            <p class="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-6">System</p>
+
+            <a href="reports.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="bar-chart-3" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Reports</span>
+            </a>
+
+            <a href="settings.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="settings" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Site Settings</span>
+            </a>
+        </div>
+
+<!-- User Mini Profile -->
+        <div class="p-4 border-t border-navy-700">
+            <a href="profile.html" class="flex items-center gap-3 p-2 rounded-lg hover:bg-navy-700 transition-colors">
+                <img src="images/admin_profile.png" alt="Admin" class="w-10 h-10 rounded-full border-2 border-gold-500">
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-white truncate">Super Admin</p>
+                    <p class="text-xs text-gray-400 truncate">admin@luxury.com</p>
+                </div>
+            </a>
+            <button onclick="adminLogout()"
+                class="mt-1 flex items-center gap-3 w-full px-3 py-2 rounded-lg text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors text-sm font-medium">
+                <i data-lucide="log-out" class="w-4 h-4 flex-shrink-0"></i>
+                <span>Logout</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col min-w-0 bg-navy-900">
+        <!-- Top Header -->
+        <header class="h-16 glass-card sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 lg:px-8 border-b border-navy-700">
+            <div class="flex items-center gap-4">
+                <button id="sidebar-toggle" class="lg:hidden text-gray-400 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-gold-500">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+                <h1 class="text-xl font-semibold hidden sm:block">Membership Packages</h1>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div id="notification-bell-container" class="relative"></div>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+            
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Pricing Plans</h2>
+                    <p class="text-sm text-gray-400 mt-1">Manage subscription packages available for sellers and agents.</p>
+                </div>
+                <button data-modal-target="packageModal" class="px-5 py-2.5 rounded-lg bg-gold-500 hover:bg-gold-600 text-navy-900 font-semibold transition-colors flex items-center gap-2 shadow-lg shadow-gold-500/20">
+                    <i data-lucide="plus" class="w-4 h-4"></i> Create Package
+                </button>
+            </div>
+
+            <div class="glass-card rounded-2xl flex-1 overflow-hidden skeleton-loader animate-pulse bg-navy-700 text-transparent flex flex-col min-h-[400px]">
+                <div class="flex-1 overflow-y-auto">
+                    <table id="packages-table" data-page-size="10" class="w-full text-left border-collapse glass-table min-w-[800px]">
+                        <thead>
+                            <tr>
+                                <th data-sort>Package Name</th>
+                                <th>Price</th>
+                                <th>Duration</th>
+                                <th>Listing Limit</th>
+                                <th>Image Limit</th>
+                                <th>Status</th>
+                                <th class="text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="packages-tbody">
+                             <!-- Row 1: Basic -->
+                            <tr data-status="active" data-desc="Standard package for private sellers" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                <td class="font-medium text-white">Basic</td>
+                                <td class="font-mono text-gray-300">$0.00</td>
+                                <td class="font-mono text-gray-300">30 Days</td>
+                                <td class="font-mono text-gray-300">5</td>
+                                <td class="font-mono text-gray-300">5</td>
+                                <td>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                        Active
+                                    </span>
+                                </td>
+                                <td class="text-right">
+                                    <button class="btn-edit-package p-1.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded transition-colors" title="Edit Package" aria-label="Edit Package"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                    <button class="btn-delete-package p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded transition-colors ml-1" title="Delete Package" data-pkg-action="delete" aria-label="Delete Package"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                </td>
+                            </tr>
+                            <!-- Row 2: Gold -->
+                            <tr data-status="active" data-desc="Featured listings and priority support" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                <td class="font-medium text-white">Gold</td>
+                                <td class="font-mono text-gray-300">$49.00</td>
+                                <td class="font-mono text-gray-300">30 Days</td>
+                                <td class="font-mono text-gray-300">50</td>
+                                <td class="font-mono text-gray-300">15</td>
+                                <td>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                        Active
+                                    </span>
+                                </td>
+                                <td class="text-right">
+                                    <button class="btn-edit-package p-1.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded transition-colors" title="Edit Package" aria-label="Edit Package"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                    <button class="btn-delete-package p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded transition-colors ml-1" title="Delete Package" data-pkg-action="delete" aria-label="Delete Package"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                </td>
+                            </tr>
+                            <!-- Row 3: Platinum -->
+                            <tr data-status="active" data-desc="Unlimited listings, 24/7 dedicated support" class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                <td class="font-medium text-white">Platinum</td>
+                                <td class="font-mono text-gray-300">$99.00</td>
+                                <td class="font-mono text-gray-300">30 Days</td>
+                                <td class="font-mono text-gray-300">Unlimited</td>
+                                <td class="font-mono text-gray-300">30</td>
+                                <td>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                        Active
+                                    </span>
+                                </td>
+                                <td class="text-right">
+                                    <button class="btn-edit-package p-1.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded transition-colors" title="Edit Package" aria-label="Edit Package"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                    <button class="btn-delete-package p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded transition-colors ml-1" title="Delete Package" data-pkg-action="delete" aria-label="Delete Package"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                <div data-table-pagination="packages-table" class="px-6 py-4 border-t border-navy-700 flex items-center justify-between">
+                    <p class="text-sm text-gray-400">Showing <span class="font-medium text-white pagination-start">1</span> to <span class="font-medium text-white pagination-end">3</span> of <span class="font-medium text-white pagination-total">3</span> entries</p>
+                    <div class="flex gap-1 pagination-buttons">
+                        <!-- Dynamically populated by shared.js -->
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Modal Container -->
+    <div id="packageModal" class="modal-container fixed inset-0 z-50 hidden items-center justify-center">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-navy-900/60 backdrop-blur-sm" data-modal-close></div>
+        
+        <!-- Modal Content -->
+        <div class="relative w-full max-w-lg glass-card rounded-2xl shadow-2xl m-4 transform transition-all border border-navy-700">
+            <form id="packageForm" novalidate class="flex flex-col h-full">
+                <div class="flex items-center justify-between p-6 border-b border-navy-700">
+                    <h3 id="modalTitle" class="text-lg font-semibold text-white">Create New Package</h3>
+                    <button type="button" data-modal-close class="text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
+                    <div>
+                        <label for="pkg-name" class="form-label">Package Name</label>
+                        <input type="text" id="pkg-name" required placeholder="e.g. Diamond Plan" class="form-input">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="pkg-price" class="form-label">Price ($)</label>
+                            <input type="number" id="pkg-price" required step="0.01" min="0" placeholder="0.00" class="form-input font-mono">
+                        </div>
+                        <div>
+                            <label for="pkg-duration" class="form-label">Duration (Days)</label>
+                            <input type="number" id="pkg-duration" required min="1" placeholder="30" class="form-input font-mono">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="pkg-listings" class="form-label">Listing Limit</label>
+                            <input type="number" id="pkg-listings" required min="-1" placeholder="-1 for unlimited" class="form-input font-mono">
+                        </div>
+                        <div>
+                            <label for="pkg-images" class="form-label">Image Limit</label>
+                            <input type="number" id="pkg-images" required min="1" placeholder="e.g. 15" class="form-input font-mono">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="pkg-status" class="form-label">Status</label>
+                        <select id="pkg-status" required class="form-input">
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="pkg-desc" class="form-label">Features / Description</label>
+                        <textarea id="pkg-desc" placeholder="Enter package details and features..." class="form-input h-24 resize-none"></textarea>
+                    </div>
+                </div>
+                <div class="flex items-center justify-end gap-3 p-6 border-t border-navy-700 bg-navy-900/50 dark:bg-navy-800/30 rounded-b-2xl">
+                    <button type="button" data-modal-close class="px-4 py-2 text-sm font-medium text-gray-300 hover:bg-navy-700 rounded-lg transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" id="pkg-submit-btn" class="px-4 py-2 text-sm font-medium bg-gold-500 hover:bg-gold-600 text-navy-900 rounded-lg transition-colors shadow-lg shadow-gold-500/20">
+                        Create Package
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="pkgDeleteConfirmModal" class="modal-container fixed inset-0 z-50 hidden items-center justify-center">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-navy-900/60 backdrop-blur-sm" data-modal-close></div>
+        
+        <!-- Modal Content -->
+        <div class="relative w-full max-w-md glass-card rounded-2xl shadow-2xl m-4 transform transition-all border border-navy-700">
+            <div class="p-6 text-center">
+                <div class="w-12 h-12 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-white mb-2">Delete Package</h3>
+                <p class="text-sm text-gray-400 mb-6">Are you sure you want to delete this package? This action cannot be undone.</p>
+                
+                <div class="flex items-center justify-center gap-3">
+                    <button type="button" data-modal-close class="px-4 py-2 text-sm font-medium text-gray-300 hover:bg-navy-700 rounded-lg transition-colors">
+                        Cancel
+                    </button>
+                    <button type="button" id="pkg-confirm-delete-btn" class="px-4 py-2 text-sm font-medium bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors shadow-lg shadow-red-500/20">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shared JS -->
+    <script src="js/shared.js"></script>
+
+    <!-- Packages Load from API -->
+    <script>
+    function loadPackages() {
+        var tbody = document.getElementById('packages-tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-gray-400">Loading...</td></tr>';
+        window.adminFetch('GET', '/api/admin/packages').then(function(r) { return r.json(); }).then(function(pkgs) {
+            if (!pkgs || pkgs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-gray-400">No packages found.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = pkgs.map(function(p) {
+                var badge = p.isActive
+                    ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400">Active</span>'
+                    : '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-500/10 text-red-400">Inactive</span>';
+                var limit = (p.listingLimit === null || p.listingLimit === -1) ? 'Unlimited' : p.listingLimit;
+                return '<tr data-id="' + p.id + '" data-status="' + (p.isActive?'active':'inactive') + '" data-desc="' + (p.description||'').replace(/"/g,'') + '" class="hover:bg-navy-900/50 transition-colors">' +
+                    '<td class="font-medium text-white">' + (p.name||'') + '</td>' +
+                    '<td class="font-mono text-gray-300">$' + parseFloat(p.price).toFixed(2) + '</td>' +
+                    '<td class="font-mono text-gray-300">' + p.durationDays + ' Days</td>' +
+                    '<td class="font-mono text-gray-300">' + limit + '</td>' +
+                    '<td class="font-mono text-gray-300">' + (p.imageLimit||0) + '</td>' +
+                    '<td>' + badge + '</td>' +
+                    '<td class="text-right whitespace-nowrap">' +
+                    '<button class="btn-edit-package p-1.5 text-blue-500 hover:bg-blue-500/10 rounded transition-colors" title="Edit Package"><i data-lucide="edit-2" class="w-4 h-4"></i></button>' +
+                    '<button class="btn-delete-package p-1.5 text-red-500 hover:bg-red-500/10 rounded transition-colors ml-1" title="Delete Package"><i data-lucide="trash-2" class="w-4 h-4"></i></button>' +
+                    '</td></tr>';
+            }).join('');
+            if (window.lucide) lucide.createIcons();
+            if (window.initTablePagination) window.initTablePagination('packages-table');
+        }).catch(function() {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-red-400">Failed to load packages.</td></tr>';
+        });
+    }
+    document.addEventListener('DOMContentLoaded', function() { loadPackages(); });
+    </script>
+
+    <!-- Packages CRUD Controller Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tableId = 'packages-table';
+            const table = document.getElementById(tableId);
+            const tbody = table ? table.querySelector('tbody') : null;
+            const form = document.getElementById('packageForm');
+            const submitBtn = document.getElementById('pkg-submit-btn');
+            const modalTitle = document.getElementById('modalTitle');
+            const packageModal = document.getElementById('packageModal');
+            
+            // Delete confirmation modal elements
+            const deleteModal = document.getElementById('pkgDeleteConfirmModal');
+            const confirmDeleteBtn = document.getElementById('pkg-confirm-delete-btn');
+
+            let currentMode = 'create'; // 'create' or 'edit'
+            let editingRow = null;
+            let rowToDelete = null;
+
+            // Form Fields
+            const fields = {
+                name: document.getElementById('pkg-name'),
+                price: document.getElementById('pkg-price'),
+                duration: document.getElementById('pkg-duration'),
+                listings: document.getElementById('pkg-listings'),
+                images: document.getElementById('pkg-images'),
+                status: document.getElementById('pkg-status'),
+                desc: document.getElementById('pkg-desc')
+            };
+
+            // Helper to close modal
+            function closePackageModal(modalEl) {
+                if (modalEl) {
+                    modalEl.classList.add('hidden');
+                    modalEl.classList.remove('flex');
+                    document.body.style.overflow = '';
+                }
+            }
+
+            // Helper to show modal
+            function showPackageModal(modalEl) {
+                if (modalEl) {
+                    modalEl.classList.remove('hidden');
+                    modalEl.classList.add('flex');
+                    document.body.style.overflow = 'hidden';
+                }
+            }
+
+            // Helper to show field error
+            function showFieldError(input, message) {
+                input.classList.add('border-red-500');
+                const err = document.createElement('p');
+                err.className = 'error-msg text-red-500 text-xs mt-1';
+                err.innerText = message;
+                input.parentElement.appendChild(err);
+            }
+
+            // Clear errors
+            function clearErrors() {
+                form.querySelectorAll('.error-msg').forEach(el => el.remove());
+                form.querySelectorAll('.border-red-500').forEach(el => el.classList.remove('border-red-500'));
+            }
+
+            // Create Package button handler
+            const createBtn = document.querySelector('[data-modal-target="packageModal"]');
+            if (createBtn) {
+                createBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    currentMode = 'create';
+                    editingRow = null;
+                    clearErrors();
+                    form.reset();
+                    
+                    modalTitle.innerText = 'Create New Package';
+                    submitBtn.innerText = 'Create Package';
+                    showPackageModal(packageModal);
+                });
+            }
+
+            // Edit and Delete Event Delegation on Tbody
+            if (tbody) {
+                tbody.addEventListener('click', (e) => {
+                    // Edit package click
+                    const editBtn = e.target.closest('.btn-edit-package');
+                    if (editBtn) {
+                        e.preventDefault();
+                        const row = editBtn.closest('tr');
+                        if (!row) return;
+
+                        currentMode = 'edit';
+                        editingRow = row;
+                        clearErrors();
+                        form.reset();
+
+                        // Pre-fill values
+                        fields.name.value = row.cells[0].innerText.trim();
+                        fields.price.value = row.cells[1].innerText.trim().replace('$', '');
+                        fields.duration.value = row.cells[2].innerText.trim().replace(' Days', '');
+                        
+                        const listingLimit = row.cells[3].innerText.trim();
+                        fields.listings.value = listingLimit === 'Unlimited' ? '-1' : listingLimit;
+                        
+                        fields.images.value = row.cells[4].innerText.trim();
+                        
+                        const statusVal = row.cells[5].innerText.trim();
+                        fields.status.value = (statusVal.toLowerCase() === 'active') ? 'Active' : 'Inactive';
+                        
+                        fields.desc.value = row.getAttribute('data-desc') || '';
+
+                        modalTitle.innerText = 'Edit Package';
+                        submitBtn.innerText = 'Save Changes';
+                        showPackageModal(packageModal);
+                    }
+
+                    // Delete package click
+                    const deleteBtn = e.target.closest('.btn-delete-package');
+                    if (deleteBtn) {
+                        e.preventDefault();
+                        e.stopPropagation(); // prevent shared.js interception
+                        
+                        const row = deleteBtn.closest('tr');
+                        if (row) {
+                            rowToDelete = row;
+                            showPackageModal(deleteModal);
+                        }
+                    }
+                });
+            }
+
+            // Confirm Delete Handler
+            if (confirmDeleteBtn) {
+                confirmDeleteBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (!rowToDelete) return;
+
+                    const pkgId = rowToDelete.getAttribute('data-id');
+                    const originalText = confirmDeleteBtn.innerHTML;
+                    confirmDeleteBtn.disabled = true;
+                    confirmDeleteBtn.classList.add('opacity-75', 'cursor-not-allowed');
+                    confirmDeleteBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin inline mr-1"></i> Deleting...';
+                    if (window.lucide) lucide.createIcons();
+
+                    window.adminFetch('DELETE', '/api/admin/packages/' + pkgId)
+                        .then(r => {
+                            if (r.ok || r.status === 204) {
+                                if (rowToDelete) rowToDelete.remove();
+                                if (typeof updateTablePagination === 'function') updateTablePagination(tableId);
+                                window.showToast('Package deleted successfully', 'success');
+                            } else {
+                                return r.json().then(d => { window.showToast(d.error || 'Cannot delete package', 'error'); });
+                            }
+                        })
+                        .catch(() => window.showToast('Failed to delete package', 'error'))
+                        .finally(() => {
+                            confirmDeleteBtn.disabled = false;
+                            confirmDeleteBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                            confirmDeleteBtn.innerHTML = originalText;
+                            if (window.lucide) lucide.createIcons();
+                            closePackageModal(deleteModal);
+                            rowToDelete = null;
+                        });
+                });
+            }
+
+            // Form Submit Handler (Create/Edit)
+            if (form) {
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    clearErrors();
+
+                    let isValid = true;
+
+                    // Validation Checks
+                    if (!fields.name.value.trim()) {
+                        isValid = false;
+                        showFieldError(fields.name, 'This field is required');
+                    }
+                    if (!fields.price.value.trim() || isNaN(parseFloat(fields.price.value)) || parseFloat(fields.price.value) < 0) {
+                        isValid = false;
+                        showFieldError(fields.price, 'Please enter a valid price (>= 0)');
+                    }
+                    if (!fields.duration.value.trim() || isNaN(parseInt(fields.duration.value)) || parseInt(fields.duration.value) < 1) {
+                        isValid = false;
+                        showFieldError(fields.duration, 'Please enter a valid duration in days (>= 1)');
+                    }
+                    if (!fields.listings.value.trim() || isNaN(parseInt(fields.listings.value)) || parseInt(fields.listings.value) < -1) {
+                        isValid = false;
+                        showFieldError(fields.listings, 'Please enter a valid listings limit (>= -1)');
+                    }
+                    if (!fields.images.value.trim() || isNaN(parseInt(fields.images.value)) || parseInt(fields.images.value) < 1) {
+                        isValid = false;
+                        showFieldError(fields.images, 'Please enter a valid image limit (>= 1)');
+                    }
+
+                    if (!isValid) {
+                        window.showToast('Please fix the errors in the form', 'error');
+                        return;
+                    }
+
+                    // Submission loading state
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+                    
+                    const loadingText = currentMode === 'create' ? 'Creating...' : 'Saving...';
+                    submitBtn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin inline mr-1"></i> ${loadingText}`;
+                    if (window.lucide) lucide.createIcons();
+
+                    // Real API call
+                    const pkgData = {
+                        name: fields.name.value.trim(),
+                        price: parseFloat(fields.price.value),
+                        durationDays: parseInt(fields.duration.value),
+                        listingLimit: parseInt(fields.listings.value),
+                        imageLimit: parseInt(fields.images.value),
+                        isActive: fields.status.value === 'Active',
+                        isFeatured: false,
+                        sortOrder: 0,
+                        description: fields.desc.value.trim()
+                    };
+
+                    const pkgId = editingRow ? editingRow.getAttribute('data-id') : null;
+                    const apiUrl  = currentMode === 'edit' && pkgId ? '/api/admin/packages/' + pkgId : '/api/admin/packages';
+                    const apiMethod = currentMode === 'edit' && pkgId ? 'PUT' : 'POST';
+
+                    window.adminFetch(apiMethod, apiUrl, pkgData)
+                        .then(r => r.ok ? r.json() : r.json().then(d => Promise.reject(d.error || 'Error')))
+                        .then(() => {
+                            window.showToast(currentMode === 'create' ? 'Package created' : 'Package updated', 'success');
+                            closePackageModal(packageModal);
+                            loadPackages();
+                        })
+                        .catch(err => window.showToast(typeof err === 'string' ? err : 'Failed to save', 'error'))
+                        .finally(() => {
+                            submitBtn.disabled = false;
+                            submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                            submitBtn.innerHTML = originalText;
+                            if (window.lucide) lucide.createIcons();
+                        });
+                });
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

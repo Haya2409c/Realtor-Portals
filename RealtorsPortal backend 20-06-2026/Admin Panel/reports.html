@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports & Analytics - Admin Portal</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        navy: {
+                            900: '#060B19',
+                            800: '#0B132B',
+                            700: '#1C2541',
+                            600: '#3A506B',
+                        },
+                        gold: {
+                            400: '#F1C40F',
+                            500: '#D4AF37',
+                            600: '#AA8C2C',
+                        }
+                    },
+                    boxShadow: {
+                        'premium': '0 10px 30px -10px rgba(0, 0, 0, 0.5)',
+                        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.1)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        /* Base styles */
+        body {
+            @apply bg-navy-900 text-white transition-colors duration-300 overflow-x-hidden;
+        }
+
+        /* Subtle Glassmorphism Utilities */
+        .glass-card { @apply bg-navy-800/80 backdrop-blur-md border border-navy-700 shadow-glass; }
+        
+        /* Table Styles */
+        .glass-table th { @apply bg-navy-800/80 font-medium text-xs tracking-wider text-gray-400 uppercase py-3 px-6 text-left border-b border-navy-700 whitespace-nowrap; }
+        .glass-table td { @apply py-4 px-6 border-b border-navy-700/50 text-sm text-gray-300; }
+
+        @layer components {
+            .panel-card { @apply bg-navy-800/50 backdrop-blur-sm border border-navy-700 rounded-xl p-6; }
+            .form-input { @apply w-full bg-navy-900 border border-navy-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500 transition-colors placeholder-gray-500; }
+            .form-label { @apply block text-sm font-medium text-gray-300 mb-2; }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            @apply bg-transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            @apply bg-navy-700 rounded-full;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            @apply bg-gold-500;
+        }
+
+        .skeleton-loader > * {
+            @apply opacity-0 transition-opacity duration-300;
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-navy-900/80 backdrop-blur-sm z-40 hidden lg:hidden"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 glass-card transform -translate-x-full transition-transform duration-300 lg:translate-x-0 lg:static lg:flex-shrink-0 flex flex-col h-full border-r border-navy-700">
+        <!-- Logo Area -->
+        <div class="h-16 flex items-center justify-between px-6 border-b border-navy-700">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-gold-500 flex items-center justify-center text-navy-900 font-bold">L</div>
+                <span class="font-semibold text-lg tracking-wide">Admin Portal</span>
+            </div>
+            <button id="sidebar-close" class="lg:hidden text-gray-400 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <!-- Navigation -->
+        <div class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+            <p class="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Main Menu</p>
+            
+            <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Dashboard</span>
+            </a>
+            
+            <a href="listings.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="building-2" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Listings</span>
+            </a>
+            
+            <a href="users.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="users" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Users</span>
+            </a>
+
+            <a href="categories-locations.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="map" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Categories & Loc</span>
+            </a>
+
+            <a href="packages.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="package" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Packages</span>
+            </a>
+
+            <p class="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-6">System</p>
+
+            <a href="reports.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-gold-500/10 text-gold-600 dark:text-gold-400 transition-colors group">
+                <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+                <span class="font-medium">Reports</span>
+            </a>
+
+            <a href="settings.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-navy-700 transition-colors group">
+                <i data-lucide="settings" class="w-5 h-5 group-hover:text-gold-500 transition-colors"></i>
+                <span class="font-medium">Site Settings</span>
+            </a>
+        </div>
+        
+        <!-- User Mini Profile -->
+        <div class="p-4 border-t border-navy-700">
+            <a href="profile.html" class="flex items-center gap-3 p-2 rounded-lg hover:bg-navy-700 transition-colors">
+                <img src="images/admin_profile.png" alt="Admin" class="w-10 h-10 rounded-full border-2 border-gold-500">
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-white truncate">Super Admin</p>
+                    <p class="text-xs text-gray-400 truncate">admin@luxury.com</p>
+                </div>
+            </a>
+            <button onclick="adminLogout()"
+                class="mt-1 flex items-center gap-3 w-full px-3 py-2 rounded-lg text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors text-sm font-medium">
+                <i data-lucide="log-out" class="w-4 h-4 flex-shrink-0"></i>
+                <span>Logout</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col min-w-0 bg-navy-900">
+        <!-- Top Header -->
+        <header class="h-16 glass-card sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 lg:px-8 border-b border-navy-700">
+            <div class="flex items-center gap-4">
+                <button id="sidebar-toggle" class="lg:hidden text-gray-400 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-gold-500">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+                <h1 class="text-xl font-semibold hidden sm:block">Reports & Analytics</h1>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div id="notification-bell-container" class="relative"></div>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 flex flex-col">
+            
+            <!-- Date Filter Row -->
+            <div class="glass-card rounded-2xl p-4 mb-6 skeleton-loader animate-pulse bg-navy-700 text-transparent flex flex-col sm:flex-row justify-between items-center gap-4">
+                <h2 class="text-lg font-semibold text-white">Revenue Overview</h2>
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <div class="relative flex-1 sm:w-40">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 flex items-center justify-center pointer-events-none">
+                            <i data-lucide="calendar" class="w-4 h-4"></i>
+                        </span>
+                        <input type="date" id="filter-from-date" class="form-input pl-10 text-xs border-navy-700" value="2026-06-01">
+                    </div>
+                    <span class="text-gray-400 text-sm">to</span>
+                    <div class="relative flex-1 sm:w-40">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 flex items-center justify-center pointer-events-none">
+                            <i data-lucide="calendar" class="w-4 h-4"></i>
+                        </span>
+                        <input type="date" id="filter-to-date" class="form-input pl-10 text-xs border-navy-700" value="2026-06-16">
+                    </div>
+                    <button id="btn-apply-date-filter" disabled class="px-4 py-2 bg-gold-500 hover:bg-gold-600 disabled:opacity-50 disabled:cursor-not-allowed text-navy-900 rounded-lg transition-colors font-medium text-sm ml-2 flex items-center gap-2">
+                        Apply
+                    </button>
+                    <button id="btn-reset-date-filter" disabled class="px-4 py-2 border border-navy-700 hover:border-navy-600 disabled:opacity-50 disabled:cursor-not-allowed text-gray-300 hover:text-white rounded-lg transition-colors font-medium text-sm ml-2 flex items-center gap-2">
+                        Reset
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <!-- Stat Card 1 -->
+                <div class="panel-card skeleton-loader animate-pulse bg-navy-700 text-transparent">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm font-medium text-gray-400 mb-1">Total Revenue</p>
+                            <h3 id="stat-total-revenue" class="text-3xl font-bold font-mono text-white">$452,890</h3>
+                        </div>
+                        <div class="p-3 rounded-xl bg-gold-500/10 text-gold-500">
+                            <i data-lucide="dollar-sign" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex items-center text-sm">
+                        <span class="text-emerald-500 flex items-center font-medium">
+                            <i data-lucide="arrow-up-right" class="w-4 h-4 mr-1"></i>
+                            8.2%
+                        </span>
+                        <span class="text-gray-400 ml-2">vs previous period</span>
+                    </div>
+                </div>
+
+                <!-- Stat Card 2 -->
+                <div class="panel-card skeleton-loader animate-pulse bg-navy-700 text-transparent">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm font-medium text-gray-400 mb-1">Total Transactions</p>
+                            <h3 id="stat-total-transactions" class="text-3xl font-bold font-mono text-white">1,245</h3>
+                        </div>
+                        <div class="p-3 rounded-xl bg-blue-500/10 text-blue-500">
+                            <i data-lucide="credit-card" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex items-center text-sm">
+                        <span class="text-emerald-500 flex items-center font-medium">
+                            <i data-lucide="arrow-up-right" class="w-4 h-4 mr-1"></i>
+                            3.1%
+                        </span>
+                        <span class="text-gray-400 ml-2">vs previous period</span>
+                    </div>
+                </div>
+
+                <!-- Stat Card 3 -->
+                <div class="panel-card skeleton-loader animate-pulse bg-navy-700 text-transparent">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm font-medium text-gray-400 mb-1">Refunds</p>
+                            <h3 id="stat-total-refunds" class="text-3xl font-bold font-mono text-white">$1,240</h3>
+                        </div>
+                        <div class="p-3 rounded-xl bg-red-500/10 text-red-500">
+                            <i data-lucide="refresh-cw" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex items-center text-sm">
+                        <span class="text-red-500 flex items-center font-medium">
+                            <i data-lucide="arrow-up-right" class="w-4 h-4 mr-1"></i>
+                            1.2%
+                        </span>
+                        <span class="text-gray-400 ml-2">vs previous period</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="glass-card rounded-2xl flex-1 overflow-hidden skeleton-loader animate-pulse bg-navy-700 text-transparent flex flex-col min-h-[400px]">
+                <div class="p-6 border-b border-navy-700 flex justify-between items-center">
+                    <h3 class="text-lg font-semibold text-white">Transaction History</h3>
+                    <button id="export-csv-btn" class="px-4 py-2 text-sm text-gold-500 hover:text-gold-600 transition-colors flex items-center gap-2 border border-gold-500/30 rounded-lg hover:bg-gold-500/10">
+                        <i data-lucide="download" class="w-4 h-4"></i> Export CSV
+                    </button>
+                </div>
+                <div class="overflow-x-auto flex-1">
+                    <table id="payment-history-table" data-page-size="10" class="w-full text-left border-collapse glass-table min-w-[800px]">
+                        <thead>
+                            <tr>
+                                <th>Transaction ID</th>
+                                <th>Date & Time</th>
+                                <th>Customer</th>
+                                <th>Plan / Item</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                <td class="font-mono text-gray-400 text-xs">TXN-8921038</td>
+                                <td>
+                                    <p class="text-sm font-mono text-white">2026-06-16</p>
+                                    <p class="text-xs text-gray-400 font-mono mt-0.5">14:32:01</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm font-medium text-white">Alex Johnson</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">alex@premiumrealty.com</p>
+                                </td>
+                                <td class="text-sm text-gray-300">Gold Package (Monthly)</td>
+                                <td class="font-mono font-medium text-white">$49.00</td>
+                                <td>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                        Completed
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                <td class="font-mono text-gray-400 text-xs">TXN-8921037</td>
+                                <td>
+                                    <p class="text-sm font-mono text-white">2026-06-16</p>
+                                    <p class="text-xs text-gray-400 font-mono mt-0.5">11:15:44</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm font-medium text-white">Sarah Jenkins</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">sarah.j@email.com</p>
+                                </td>
+                                <td class="text-sm text-gray-300">Platinum Package (Yearly)</td>
+                                <td class="font-mono font-medium text-white">$990.00</td>
+                                <td>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                        Completed
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-navy-900/50 dark:hover:bg-navy-800/50 transition-colors">
+                                <td class="font-mono text-gray-400 text-xs">TXN-8921036</td>
+                                <td>
+                                    <p class="text-sm font-mono text-white">2026-06-15</p>
+                                    <p class="text-xs text-gray-400 font-mono mt-0.5">09:05:12</p>
+                                </td>
+                                <td>
+                                    <p class="text-sm font-medium text-white">Michael Brown</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">mike.brown@email.com</p>
+                                </td>
+                                <td class="text-sm text-gray-300">Gold Package (Monthly)</td>
+                                <td class="font-mono font-medium text-white">$49.00</td>
+                                <td>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-500/10 dark:text-red-400">
+                                        Failed
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                <div data-table-pagination="payment-history-table" class="px-6 py-4 border-t border-navy-700 flex items-center justify-between">
+                    <p class="text-sm text-gray-400">Showing <span class="font-medium text-white pagination-start">1</span> to <span class="font-medium text-white pagination-end">3</span> of <span class="font-medium text-white pagination-total">3</span> entries</p>
+                    <div class="flex gap-1 pagination-buttons">
+                        <!-- Dynamically populated by shared.js -->
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Shared JS -->
+    <script src="js/shared.js"></script>
+
+    <!-- Reports API Load Script -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var tbody = document.querySelector('#payment-history-table tbody');
+        var statRevEl = document.getElementById('stat-total-revenue');
+        var statTxnEl = document.getElementById('stat-total-transactions');
+
+        function statusBadge(s) {
+            var map = { 'Completed': 'bg-emerald-500/10 text-emerald-400', 'Failed': 'bg-red-500/10 text-red-400', 'Pending': 'bg-amber-500/10 text-amber-400' };
+            return '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' + (map[s]||'bg-gray-500/10 text-gray-400') + '">' + (s||'Unknown') + '</span>';
+        }
+
+        function loadTransactions(from, to) {
+            if (!tbody) return;
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-gray-400">Loading...</td></tr>';
+            var url = '/api/admin/reports/transactions?pageSize=100';
+            if (from) url += '&from=' + from;
+            if (to) url += '&to=' + to;
+            window.adminFetch('GET', url).then(function(r) { return r.json(); }).then(function(d) {
+                var items = d.items || [];
+                if (items.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-gray-400">No transactions found.</td></tr>';
+                } else {
+                    tbody.innerHTML = items.map(function(t) {
+                        var dt = new Date(t.createdAt);
+                        var date = dt.toISOString().split('T')[0];
+                        var time = dt.toTimeString().split(' ')[0];
+                        return '<tr data-search-match="true" class="hover:bg-navy-900/50 transition-colors">' +
+                            '<td class="font-mono text-gray-400 text-xs">' + (t.transactionId||'—') + '</td>' +
+                            '<td><p class="text-sm font-mono text-white">' + date + '</p><p class="text-xs text-gray-400 font-mono mt-0.5">' + time + '</p></td>' +
+                            '<td><p class="text-sm font-medium text-white">' + (t.customerName||'') + '</p><p class="text-xs text-gray-400 mt-0.5">' + (t.customerEmail||'') + '</p></td>' +
+                            '<td class="text-sm text-gray-300">' + (t.package||'') + '</td>' +
+                            '<td class="font-mono font-medium text-white">$' + parseFloat(t.amount).toFixed(2) + '</td>' +
+                            '<td>' + statusBadge(t.status) + '</td>' +
+                            '</tr>';
+                    }).join('');
+                    if (window.initTablePagination) window.initTablePagination('payment-history-table');
+                }
+                if (statRevEl) statRevEl.textContent = '$' + (d.totalRevenue||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+                if (statTxnEl) statTxnEl.textContent = (d.total||0).toLocaleString('en-US');
+            }).catch(function() {
+                if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-red-400">Failed to load.</td></tr>';
+            });
+        }
+
+        window._loadTransactions = loadTransactions;
+        loadTransactions('', '');
+
+        // Wire apply filter to real API
+        var applyBtn = document.getElementById('btn-apply-date-filter');
+        var resetBtn = document.getElementById('btn-reset-date-filter');
+        var fromInp  = document.getElementById('filter-from-date');
+        var toInp    = document.getElementById('filter-to-date');
+        if (applyBtn) {
+            applyBtn.addEventListener('click', function() {
+                if (!fromInp || !toInp) return;
+                loadTransactions(fromInp.value, toInp.value);
+                if (resetBtn) { resetBtn.disabled = false; resetBtn.classList.remove('opacity-50','cursor-not-allowed'); }
+            });
+        }
+        if (resetBtn) {
+            resetBtn.addEventListener('click', function() {
+                loadTransactions('', '');
+                if (fromInp) fromInp.value = '';
+                if (toInp) toInp.value = '';
+                resetBtn.disabled = true; resetBtn.classList.add('opacity-50','cursor-not-allowed');
+            });
+        }
+    });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const exportBtn = document.getElementById('export-csv-btn');
+            const table = document.getElementById('payment-history-table');
+
+            // Date range filter elements
+            const fromDateInput = document.getElementById('filter-from-date');
+            const toDateInput = document.getElementById('filter-to-date');
+            const applyFilterBtn = document.getElementById('btn-apply-date-filter');
+            const resetFilterBtn = document.getElementById('btn-reset-date-filter');
+
+            // Stats elements
+            const statRevenue = document.getElementById('stat-total-revenue');
+            const statTransactions = document.getElementById('stat-total-transactions');
+            const statRefunds = document.getElementById('stat-total-refunds');
+
+            let initialFromVal = "";
+            let initialToVal = "";
+            let originalRevenue = "";
+            let originalTransactions = "";
+            let originalRefunds = "";
+
+            if (fromDateInput && toDateInput) {
+                initialFromVal = fromDateInput.value;
+                initialToVal = toDateInput.value;
+            }
+
+            if (statRevenue && statTransactions && statRefunds) {
+                originalRevenue = statRevenue.innerText;
+                originalTransactions = statTransactions.innerText;
+                originalRefunds = statRefunds.innerText;
+            }
+
+            let lastAppliedFrom = initialFromVal;
+            let lastAppliedTo = initialToVal;
+
+            // Initialize pagination for payment-history-table
+            if (table && window.initTablePagination) {
+                table.querySelectorAll('tbody tr').forEach(row => {
+                    row.dataset.searchMatch = 'true';
+                });
+                window.initTablePagination("payment-history-table");
+            }
+
+            // Highlight visual indicator helper
+            function highlightFilter(el, isActive) {
+                if (!el) return;
+                if (isActive) {
+                    el.classList.remove('border-navy-700');
+                    el.classList.add('border-gold-500', 'ring-1', 'ring-gold-500/20');
+                } else {
+                    el.classList.remove('border-gold-500', 'ring-1', 'ring-gold-500/20');
+                    el.classList.add('border-navy-700');
+                }
+            }
+
+            // Check if inputs differ from last applied values
+            function checkFilterChanges() {
+                if (!fromDateInput || !toDateInput || !applyFilterBtn || !resetFilterBtn) return;
+                
+                const currentFrom = fromDateInput.value;
+                const currentTo = toDateInput.value;
+                
+                const hasChanges = (currentFrom !== lastAppliedFrom || currentTo !== lastAppliedTo);
+                
+                applyFilterBtn.disabled = !hasChanges;
+                if (hasChanges) {
+                    applyFilterBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                } else {
+                    applyFilterBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                }
+
+                highlightFilter(fromDateInput, currentFrom !== initialFromVal);
+                highlightFilter(toDateInput, currentTo !== initialToVal);
+            }
+
+            if (fromDateInput && toDateInput) {
+                fromDateInput.addEventListener('change', checkFilterChanges);
+                toDateInput.addEventListener('change', checkFilterChanges);
+                checkFilterChanges(); // run once on load
+            }
+
+            // Apply filter handler
+            if (applyFilterBtn) {
+                applyFilterBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (!fromDateInput || !toDateInput) return;
+
+                    const fromVal = fromDateInput.value;
+                    const toVal = toDateInput.value;
+
+                    // Validation
+                    if (!fromVal || !toVal) {
+                        if (window.showToast) {
+                            window.showToast("Please select both date range", "error");
+                        }
+                        return;
+                    }
+
+                    // Show loading state
+                    if (window.showToast) {
+                        window.showToast("Filtering...", "info");
+                    }
+
+                    const originalBtnHtml = applyFilterBtn.innerHTML;
+                    applyFilterBtn.disabled = true;
+                    applyFilterBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    applyFilterBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin inline-block mr-1"></i> Filtering...';
+                    if (window.lucide) window.lucide.createIcons();
+
+                    setTimeout(() => {
+                        // Apply filters to table rows
+                        const rows = table.querySelectorAll('tbody tr');
+                        rows.forEach(row => {
+                            if (row.classList.contains('empty-row')) return;
+                            const cells = row.cells;
+                            if (cells.length < 2) return;
+                            
+                            // Extract date YYYY-MM-DD
+                            let rowDateStr = "";
+                            const dateParagraphs = cells[1].querySelectorAll('p');
+                            if (dateParagraphs.length > 0) {
+                                rowDateStr = dateParagraphs[0].innerText.trim();
+                            } else {
+                                rowDateStr = cells[1].innerText.trim().split(/\s+/)[0];
+                            }
+
+                            // String comparison works perfectly for YYYY-MM-DD
+                            const match = (rowDateStr >= fromVal && rowDateStr <= toVal);
+                            row.dataset.searchMatch = match ? 'true' : 'false';
+                        });
+
+                        // Reset pagination to page 1
+                        if (window.paginationState && window.paginationState['payment-history-table']) {
+                            window.paginationState['payment-history-table'].currentPage = 1;
+                        }
+                        
+                        if (typeof updateTablePagination === 'function') {
+                            updateTablePagination('payment-history-table');
+                        }
+
+                        // Calculate and update stats cards based on filtered rows
+                        const activeRows = Array.from(rows).filter(row => row.dataset.searchMatch !== 'false' && !row.classList.contains('empty-row'));
+                        let totalRevenue = 0;
+                        let totalRefunds = 0;
+
+                        activeRows.forEach(row => {
+                            const cells = row.cells;
+                            if (cells.length < 6) return;
+                            const amountText = cells[4].innerText.trim();
+                            const amountVal = parseFloat(amountText.replace(/[^0-9.]/g, '')) || 0;
+                            const statusText = cells[5].innerText.trim().toLowerCase();
+
+                            if (statusText === 'completed') {
+                                totalRevenue += amountVal;
+                            } else if (statusText === 'failed') {
+                                totalRefunds += amountVal;
+                            }
+                        });
+
+                        if (statRevenue) {
+                            statRevenue.innerText = '$' + totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        }
+                        if (statTransactions) {
+                            statTransactions.innerText = activeRows.length.toLocaleString('en-US');
+                        }
+                        if (statRefunds) {
+                            statRefunds.innerText = '$' + totalRefunds.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        }
+
+                        // Success toast
+                        if (window.showToast) {
+                            window.showToast("Report filtered successfully", "success");
+                        }
+
+                        lastAppliedFrom = fromVal;
+                        lastAppliedTo = toVal;
+
+                        // Enable reset button
+                        resetFilterBtn.disabled = false;
+                        resetFilterBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+
+                        // Restore apply button state
+                        applyFilterBtn.innerHTML = originalBtnHtml;
+                        if (window.lucide) window.lucide.createIcons();
+                        checkFilterChanges();
+                    }, 1000);
+                });
+            }
+
+            // Reset handler
+            if (resetFilterBtn) {
+                resetFilterBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (!fromDateInput || !toDateInput) return;
+
+                    // Show loading state
+                    if (window.showToast) {
+                        window.showToast("Filtering...", "info");
+                    }
+
+                    const originalBtnHtml = resetFilterBtn.innerHTML;
+                    resetFilterBtn.disabled = true;
+                    resetFilterBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    resetFilterBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin inline-block mr-1"></i> Resetting...';
+                    if (window.lucide) window.lucide.createIcons();
+
+                    setTimeout(() => {
+                        // Restore date fields and borders
+                        fromDateInput.value = initialFromVal;
+                        toDateInput.value = initialToVal;
+                        highlightFilter(fromDateInput, false);
+                        highlightFilter(toDateInput, false);
+
+                        // Reset table searchMatch logic
+                        const rows = table.querySelectorAll('tbody tr');
+                        rows.forEach(row => {
+                            row.dataset.searchMatch = 'true';
+                        });
+
+                        // Reset pagination to page 1
+                        if (window.paginationState && window.paginationState['payment-history-table']) {
+                            window.paginationState['payment-history-table'].currentPage = 1;
+                        }
+                        if (typeof updateTablePagination === 'function') {
+                            updateTablePagination('payment-history-table');
+                        }
+
+                        // Restore stats
+                        if (statRevenue) statRevenue.innerText = originalRevenue;
+                        if (statTransactions) statTransactions.innerText = originalTransactions;
+                        if (statRefunds) statRefunds.innerText = originalRefunds;
+
+                        // Success toast
+                        if (window.showToast) {
+                            window.showToast("Report filtered successfully", "success");
+                        }
+
+                        lastAppliedFrom = initialFromVal;
+                        lastAppliedTo = initialToVal;
+
+                        // Disable reset button
+                        resetFilterBtn.disabled = true;
+                        resetFilterBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                        resetFilterBtn.innerHTML = originalBtnHtml;
+                        if (window.lucide) window.lucide.createIcons();
+                        checkFilterChanges();
+                    }, 1000);
+                });
+            }
+
+            // Export CSV Handler
+            if (exportBtn && table) {
+                exportBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+
+                    const rows = Array.from(table.querySelectorAll('tbody tr'));
+                    const activeRows = rows.filter(row => row.dataset.searchMatch !== 'false' && !row.classList.contains('empty-row'));
+
+                    if (activeRows.length === 0) {
+                        if (window.showToast) {
+                            window.showToast("No data to export", "warning");
+                        }
+                        return;
+                    }
+
+                    if (window.showToast) {
+                        window.showToast("Generating CSV...", "info");
+                    }
+
+                    const originalHtml = exportBtn.innerHTML;
+                    exportBtn.disabled = true;
+                    exportBtn.classList.add('opacity-75', 'cursor-not-allowed');
+                    exportBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin inline-block mr-1"></i> Generating...';
+                    if (window.lucide) window.lucide.createIcons();
+
+                    setTimeout(() => {
+                        try {
+                            const headers = ["Transaction ID", "Date", "Time", "Customer Name", "Customer Email", "Plan / Item", "Amount", "Status"];
+                            const csvRows = [headers.map(escapeCSV).join(',')];
+
+                            activeRows.forEach(row => {
+                                const cells = row.cells;
+                                if (cells.length < 6) return;
+
+                                const txnId = cells[0].innerText.trim();
+
+                                let date = '';
+                                let time = '';
+                                const dateTimeParagraphs = cells[1].querySelectorAll('p');
+                                if (dateTimeParagraphs.length >= 2) {
+                                    date = dateTimeParagraphs[0].innerText.trim();
+                                    time = dateTimeParagraphs[1].innerText.trim();
+                                } else {
+                                    const text = cells[1].innerText.trim();
+                                    const parts = text.split(/\s+/);
+                                    date = parts[0] || '';
+                                    time = parts[1] || '';
+                                }
+
+                                let customerName = '';
+                                let customerEmail = '';
+                                const customerParagraphs = cells[2].querySelectorAll('p');
+                                if (customerParagraphs.length >= 2) {
+                                    customerName = customerParagraphs[0].innerText.trim();
+                                    customerEmail = customerParagraphs[1].innerText.trim();
+                                } else {
+                                    const text = cells[2].innerText.trim();
+                                    const parts = text.split('\n');
+                                    customerName = parts[0] || text;
+                                    customerEmail = parts[1] || '';
+                                }
+
+                                const planItem = cells[3].innerText.trim();
+                                const amount = cells[4].innerText.trim();
+                                const status = cells[5].innerText.trim();
+
+                                const rowData = [
+                                    txnId,
+                                    date,
+                                    time,
+                                    customerName,
+                                    customerEmail,
+                                    planItem,
+                                    amount,
+                                    status
+                                ];
+
+                                csvRows.push(rowData.map(escapeCSV).join(','));
+                            });
+
+                            const csvContent = csvRows.join('\n');
+                            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                            
+                            const today = new Date();
+                            const yyyy = today.getFullYear();
+                            const mm = String(today.getMonth() + 1).padStart(2, '0');
+                            const dd = String(today.getDate()).padStart(2, '0');
+                            const filename = `payment-report-${yyyy}-${mm}-${dd}.csv`;
+
+                            const link = document.createElement("a");
+                            if (link.download !== undefined) {
+                                const url = URL.createObjectURL(blob);
+                                link.setAttribute("href", url);
+                                link.setAttribute("download", filename);
+                                link.style.visibility = 'hidden';
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                                
+                                if (window.showToast) {
+                                    window.showToast(`Report exported successfully: ${filename}`, "success");
+                                }
+                            }
+                        } catch (err) {
+                            console.error(err);
+                            if (window.showToast) {
+                                window.showToast("Failed to export CSV", "error");
+                            }
+                        } finally {
+                            exportBtn.disabled = false;
+                            exportBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                            exportBtn.innerHTML = originalHtml;
+                            if (window.lucide) window.lucide.createIcons();
+                        }
+                    }, 1000);
+                });
+            }
+
+            function escapeCSV(val) {
+                if (val === null || val === undefined) return '';
+                let str = val.toString().trim();
+                str = str.replace(/"/g, '""');
+                return `"${str}"`;
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

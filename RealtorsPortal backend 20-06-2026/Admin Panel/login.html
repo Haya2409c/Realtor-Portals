@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login — Luxury Realtors Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter','sans-serif'] },
+                    colors: {
+                        navy: { 900:'#060B19', 800:'#0B132B', 700:'#1C2541' },
+                        gold: { 500:'#D4AF37' }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Auth redirect runs immediately — before any rendering -->
+    <script>
+        if (localStorage.getItem('adminToken')) {
+            window.location.href = '/admin/index.html';
+        }
+    </script>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 bg-navy-900" style="background:#060B19; font-family:'Inter',sans-serif;">
+
+    <div class="w-full max-w-md">
+        <!-- Logo -->
+        <div class="text-center mb-8">
+            <div class="w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-4"
+                 style="background:#D4AF37;">
+                <span class="text-2xl font-bold" style="color:#060B19;">L</span>
+            </div>
+            <h1 class="text-2xl font-semibold text-white">Admin Portal</h1>
+            <p class="text-gray-400 text-sm mt-1">Luxury Realtors — Secure Login</p>
+        </div>
+
+        <!-- Card -->
+        <div class="rounded-2xl p-8 shadow-2xl"
+             style="background:rgba(11,19,43,0.90); border:1px solid #1C2541;">
+
+            <!-- Error banner -->
+            <div id="errorMsg"
+                 class="hidden mb-5 p-3 rounded-lg text-sm text-center"
+                 style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:#f87171;">
+            </div>
+
+            <!-- Login form — NO onsubmit attribute; handler attached via JS -->
+            <form id="loginForm" novalidate autocomplete="on">
+
+                <!-- Email -->
+                <div class="mb-5">
+                    <label for="email"
+                           class="block text-sm font-medium mb-2"
+                           style="color:#d1d5db;">Email Address</label>
+                    <input type="email" id="email" name="email"
+                           required autocomplete="username"
+                           placeholder="admin@realtorsportal.com"
+                           class="w-full rounded-lg px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none transition-colors"
+                           style="background:#060B19; border:1px solid #1C2541; focus:border-color:#D4AF37;">
+                </div>
+
+                <!-- Password -->
+                <div class="mb-7">
+                    <label for="password"
+                           class="block text-sm font-medium mb-2"
+                           style="color:#d1d5db;">Password</label>
+                    <input type="password" id="password" name="password"
+                           required autocomplete="current-password"
+                           placeholder="••••••••"
+                           class="w-full rounded-lg px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none transition-colors"
+                           style="background:#060B19; border:1px solid #1C2541;">
+                </div>
+
+                <!-- Submit -->
+                <button type="submit" id="submitBtn"
+                        class="w-full font-semibold py-3 rounded-xl text-sm transition-opacity disabled:opacity-50"
+                        style="background:#D4AF37; color:#060B19;">
+                    Sign In to Admin Panel
+                </button>
+            </form>
+        </div>
+
+        <p class="text-center text-xs mt-6" style="color:#374151;">
+            Luxury Realtors Admin &copy; 2026
+        </p>
+    </div>
+
+    <script>
+        // Attach submit handler via addEventListener — more reliable than onsubmit attribute
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            var email    = document.getElementById('email').value.trim();
+            var password = document.getElementById('password').value;
+            var btn      = document.getElementById('submitBtn');
+            var errDiv   = document.getElementById('errorMsg');
+
+            // Clear previous error
+            errDiv.classList.add('hidden');
+            errDiv.textContent = '';
+
+            if (!email || !password) {
+                errDiv.textContent = 'Please enter your email and password.';
+                errDiv.classList.remove('hidden');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Signing in...';
+
+            try {
+                var res = await fetch('/api/auth/admin/login', {
+                    method:  'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body:    JSON.stringify({ email: email, password: password })
+                });
+
+                var data = await res.json();
+
+                if (res.ok) {
+                    // Store auth tokens
+                    localStorage.setItem('adminToken',        data.accessToken);
+                    localStorage.setItem('adminRefreshToken', data.refreshToken);
+                    localStorage.setItem('adminUserId',       data.user ? data.user.id : '');
+                    localStorage.setItem('adminUser',         JSON.stringify(data.user || {}));
+
+                    // Go to dashboard
+                    window.location.href = '/admin/index.html';
+                } else {
+                    errDiv.textContent = (data && data.error) ? data.error : 'Invalid email or password.';
+                    errDiv.classList.remove('hidden');
+                }
+            } catch (err) {
+                errDiv.textContent = 'Cannot connect to server. Is the backend running?';
+                errDiv.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Sign In to Admin Panel';
+            }
+        });
+
+        // Focus email field on load
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('email').focus();
+        });
+    </script>
+</body>
+</html>
